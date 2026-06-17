@@ -1,0 +1,30 @@
+:root {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: #0a1628;
+  color: #f0f4f8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Pulsing dot for "in transit / in execution" statuses */
+@keyframes mb-pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.35; }
+  100% { opacity: 1; }
+}
+.mb-pulse {
+  animation: mb-pulse 1.4s ease-in-out infinite;
+}
