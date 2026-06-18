@@ -392,6 +392,7 @@ export interface Database {
       supplier_owns_line_item: { Args: { p_line_item_id: string }; Returns: boolean };
       port_authority_sees_order: { Args: { p_order_id: string }; Returns: boolean };
       can_chat: { Args: { sender_id: string; receiver_id: string }; Returns: boolean };
+      admin_delete_user: { Args: { p_target_user_id: string }; Returns: undefined };
       admin_initiate_password_reset: { Args: { target_user_id: string }; Returns: string };
       get_user_email_for_reset: { Args: { target_user_id: string }; Returns: string };
       get_email_by_username: { Args: { p_username: string }; Returns: string };
