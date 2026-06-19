@@ -75,7 +75,7 @@ export default function Register() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState<UserRole | ''>('');
+  const [role, setRole] = useState<string>('');
   const [companyName, setCompanyName] = useState('');
   const [phone, setPhone] = useState('');
   const [extraFields, setExtraFields] = useState<Record<string, string>>({});
@@ -93,9 +93,9 @@ export default function Register() {
     })();
   }, []);
 
-  const activeFields = useMemo(() => ROLE_FIELDS[role] ?? [], [role]);
+  const activeFields = useMemo(() => ROLE_FIELDS[role as UserRole] ?? [], [role]);
 
-  const handleRoleChange = (newRole: UserRole) => {
+  const handleRoleChange = (newRole: string) => {
     setRole(newRole);
     setExtraFields({});
   };
@@ -136,7 +136,7 @@ export default function Register() {
       username: username.trim(),
       password,
       full_name: fullName.trim(),
-      role,
+      role: role as UserRole,
       company_name: companyName.trim() || null,
       phone: phone.trim() || null,
       ...extra,
@@ -220,7 +220,7 @@ export default function Register() {
             select
             label="Role"
             value={role}
-            onChange={(e) => handleRoleChange(e.target.value as UserRole | '')}
+            onChange={(e) => handleRoleChange(e.target.value)}
             disabled={submitting}
             fullWidth
           >
