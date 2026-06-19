@@ -75,7 +75,7 @@ export default function Register() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState<UserRole>('captain');
+  const [role, setRole] = useState<UserRole | ''>('');
   const [companyName, setCompanyName] = useState('');
   const [phone, setPhone] = useState('');
   const [extraFields, setExtraFields] = useState<Record<string, string>>({});
@@ -108,6 +108,7 @@ export default function Register() {
     if (username.trim().length < 3) return 'Username must be at least 3 characters.';
     if (!EMAIL_RE.test(email.trim())) return 'Please enter a valid email address.';
     if (password.length < 8) return 'Password must be at least 8 characters.';
+    if (!role) return 'Please select a role.';
     for (const field of activeFields) {
       if (field.required && !(extraFields[field.key] ?? '').trim()) {
         return `${field.label} is required.`;
@@ -219,10 +220,11 @@ export default function Register() {
             select
             label="Role"
             value={role}
-            onChange={(e) => handleRoleChange(e.target.value as UserRole)}
+            onChange={(e) => handleRoleChange(e.target.value as UserRole | '')}
             disabled={submitting}
             fullWidth
           >
+            <MenuItem value="" disabled>Select role</MenuItem>
             {ROLE_OPTIONS.map((opt) => (
               <MenuItem key={opt.value} value={opt.value}>
                 {opt.label}
