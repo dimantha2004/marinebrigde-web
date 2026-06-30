@@ -99,7 +99,6 @@ const NAV: Record<UserRole, { base: string; items: NavItem[] }> = {
     items: [
       { label: 'Users', path: 'users', icon: People },
       { label: 'Live', path: 'monitoring', icon: MonitorHeart },
-      { label: 'Mapping', path: 'supplier-mapping', icon: AccountTree },
       { label: 'Ports', path: 'ports', icon: DirectionsBoat },
       { label: 'Settings', path: 'settings', icon: Settings },
     ],

@@ -25,7 +25,6 @@ import { supabase } from '@/lib/supabase';
 import { useOrderDetail, type LineItemDetail } from '@/hooks/useOrderDetail';
 import OrderStatusBadge from '@/components/shared/OrderStatusBadge';
 import ServiceCategoryIcon from '@/components/shared/ServiceCategoryIcon';
-import SupplierAssignedBadge from '@/components/captain/SupplierAssignedBadge';
 import { palette, fonts, radius } from '@/constants/theme';
 
 const CLAUSE_SERVICES = ['Bunkering', 'De-bunkering'];
@@ -197,8 +196,7 @@ export default function CharterOrderDetail() {
               {line.specifications && (
                 <Typography sx={{ color: palette.fogWhite, fontSize: 13, mt: 1 }}>{line.specifications}</Typography>
               )}
-              <Divider sx={{ borderColor: palette.navyDeep, my: 1 }} />
-              <SupplierAssignedBadge supplierName={supplierLabel(line)} />
+
             </Card>
           );
         })

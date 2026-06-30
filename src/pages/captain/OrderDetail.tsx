@@ -34,7 +34,6 @@ import TimelineTracker from '@/components/shared/TimelineTracker';
 import DocumentCard from '@/components/shared/DocumentCard';
 import MessageThread from '@/components/shared/MessageThread';
 import ServiceCategoryIcon from '@/components/shared/ServiceCategoryIcon';
-import SupplierAssignedBadge from '@/components/captain/SupplierAssignedBadge';
 import { openDocument } from '@/lib/storage';
 import { palette, fonts, radius } from '@/constants/theme';
 
@@ -199,7 +198,6 @@ export default function CaptainOrderDetail() {
               <AccordionDetails sx={{ bgcolor: palette.navyDeep }}>
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 1 }}>
                   <OrderStatusBadge status={li.line_status} kind="line" />
-                  <SupplierAssignedBadge supplierName={supplierName} />
                 </Box>
                 {li.requested_datetime && (
                   <DetailLine label="Requested" value={dayjs(li.requested_datetime).format('MMM D, YYYY · HH:mm')} />

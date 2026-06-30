@@ -25,11 +25,7 @@ import NewOrderAddServices from '@/pages/captain/new-order/AddServices';
 import NewOrderCart from '@/pages/captain/new-order/Cart';
 import NewOrderCheckout from '@/pages/captain/new-order/Checkout';
 
-// Supplier
-import SupplierDashboard from '@/pages/supplier/Dashboard';
-import SupplierOrders from '@/pages/supplier/Orders';
-import SupplierOrderDetail from '@/pages/supplier/OrderDetail';
-import SupplierProfile from '@/pages/supplier/Profile';
+
 
 // Charter party
 import CharterApprovals from '@/pages/charter-party/Approvals';
@@ -216,14 +212,7 @@ export default function App() {
         <Route path="new-order/checkout" element={<NewOrderCheckout />} />
       </Route>
 
-      {/* Supplier */}
-      <Route path="/supplier" element={<RequireRole role="supplier"><AppShell role="supplier" /></RequireRole>}>
-        <Route index element={<Navigate to="dashboard" replace />} />
-        <Route path="dashboard" element={<SupplierDashboard />} />
-        <Route path="orders" element={<SupplierOrders />} />
-        <Route path="orders/:id" element={<SupplierOrderDetail />} />
-        <Route path="profile" element={<SupplierProfile />} />
-      </Route>
+
 
       {/* Charter party */}
       <Route path="/charter-party" element={<RequireRole role="charter_party"><AppShell role="charter_party" /></RequireRole>}>

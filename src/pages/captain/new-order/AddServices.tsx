@@ -36,12 +36,9 @@ export default function NewOrderAddServices() {
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const [activeName, setActiveName] = useState<string | null>(null);
-  const [quantity, setQuantity] = useState('1');
-  const [unit, setUnit] = useState('');
   const [specifications, setSpecifications] = useState('');
   const [requestedDatetime, setRequestedDatetime] = useState('');
-  const [specialInstructions, setSpecialInstructions] = useState('');
-  const [unitPrice, setUnitPrice] = useState('');
+  const [file, setFile] = useState<File | undefined>(undefined);
 
   useEffect(() => {
     let cancelled = false;
@@ -66,16 +63,12 @@ export default function NewOrderAddServices() {
   }, [categories]);
 
   const openSheet = (name: string) => {
-    const def = SERVICE_CATEGORIES.find((c) => c.name === name);
     const categoryId = categoryIdByName.get(name);
     const existing = categoryId ? getItem(categoryId) : undefined;
     setActiveName(name);
-    setQuantity(existing ? String(existing.quantity) : '1');
-    setUnit(existing?.unit ?? def?.defaultUnit ?? COMMON_UNITS[0]);
     setSpecifications(existing?.specifications ?? '');
     setRequestedDatetime(existing?.requestedDatetime ?? '');
-    setSpecialInstructions(existing?.specialInstructions ?? '');
-    setUnitPrice(existing ? String(existing.estimatedUnitPrice) : '');
+    setFile(existing?.file);
   };
 
   const closeSheet = () => setActiveName(null);
@@ -88,19 +81,18 @@ export default function NewOrderAddServices() {
       closeSheet();
       return;
     }
-    const qty = parseFloat(quantity) || 0;
-    const price = parseFloat(unitPrice) || 0;
     addOrUpdateItem({
       serviceCategoryId: categoryId,
       serviceName: activeName,
       iconName: serviceIconFor(activeName),
-      quantity: qty,
-      unit: unit || 'units',
+      quantity: 1,
+      unit: 'units',
       specifications: specifications.trim(),
-      specialInstructions: specialInstructions.trim(),
+      specialInstructions: '',
       requestedDatetime: requestedDatetime.trim() || null,
-      estimatedUnitPrice: price,
-      estimatedTotalPrice: qty * price,
+      estimatedUnitPrice: 0,
+      estimatedTotalPrice: 0,
+      file,
     });
     closeSheet();
   };
@@ -109,6 +101,15 @@ export default function NewOrderAddServices() {
     const id = categoryIdByName.get(name);
     return id ? !!getItem(id) : false;
   };
+
+  const standardCategories = useMemo(
+    () => SERVICE_CATEGORIES.filter((c) => c.name !== 'Waste Disposal' && c.name !== 'Sludge Removal'),
+    []
+  );
+  const wasteCategories = useMemo(
+    () => SERVICE_CATEGORIES.filter((c) => c.name === 'Waste Disposal' || c.name === 'Sludge Removal'),
+    []
+  );
 
   const activeIcon = activeName
     ? createElement(muiIconFor(serviceIconFor(activeName)), { sx: { color: palette.steelBlue, fontSize: 24 } })
@@ -140,8 +141,44 @@ export default function NewOrderAddServices() {
       ) : (
         <>
           <Typography sx={{ color: palette.hullGray, mb: 2 }}>Tap a service to add it to your order.</Typography>
+          
+          <Typography sx={{ fontFamily: fonts.display, color: palette.fogWhite, fontSize: 16, mb: 1.5, mt: 1 }}>
+            General Services
+          </Typography>
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', sm: '1fr 1fr 1fr' }, gap: 1.5, mb: 3 }}>
+            {standardCategories.map((cat) => {
+              const added = isAdded(cat.name);
+              return (
+                <Card
+                  key={cat.name}
+                  onClick={() => openSheet(cat.name)}
+                  sx={{
+                    position: 'relative',
+                    py: 3,
+                    px: 1,
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    border: `1px solid ${added ? palette.engineGreen : 'transparent'}`,
+                    '&:hover': { bgcolor: palette.surfaceVariant },
+                  }}
+                >
+                  {added && (
+                    <CheckCircle sx={{ position: 'absolute', top: 8, right: 8, color: palette.engineGreen, fontSize: 20 }} />
+                  )}
+                  <ServiceCategoryIcon name={cat.name} size={30} color={palette.steelBlue} />
+                  <Typography sx={{ color: palette.fogWhite, fontWeight: 500, fontSize: 14, mt: 1 }}>
+                    {cat.name}
+                  </Typography>
+                </Card>
+              );
+            })}
+          </Box>
+
+          <Typography sx={{ fontFamily: fonts.display, color: palette.fogWhite, fontSize: 16, mb: 1.5, mt: 3.5 }}>
+            Waste & Disposal Services
+          </Typography>
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', sm: '1fr 1fr 1fr' }, gap: 1.5 }}>
-            {SERVICE_CATEGORIES.map((cat) => {
+            {wasteCategories.map((cat) => {
               const added = isAdded(cat.name);
               return (
                 <Card
@@ -200,35 +237,12 @@ export default function NewOrderAddServices() {
 
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <TextField
-              label="Quantity"
-              type="number"
-              value={quantity}
-              onChange={(e) => setQuantity(e.target.value)}
-              fullWidth
-            />
-            <Box>
-              <Typography sx={{ color: palette.hullGray, fontSize: 12, mb: 0.5 }}>Unit</Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                {COMMON_UNITS.map((u) => (
-                  <Chip
-                    key={u}
-                    label={u}
-                    onClick={() => setUnit(u)}
-                    sx={{
-                      bgcolor: unit === u ? palette.steelBlue : palette.oceanMid,
-                      color: palette.fogWhite,
-                      fontWeight: 500,
-                    }}
-                  />
-                ))}
-              </Box>
-            </Box>
-            <TextField
-              label="Specifications"
+              label="Manual Message / Order Details"
+              placeholder="Type your message, list requirements, or notes here..."
               value={specifications}
               onChange={(e) => setSpecifications(e.target.value)}
               multiline
-              minRows={2}
+              minRows={4}
               fullWidth
             />
             <TextField
@@ -239,22 +253,38 @@ export default function NewOrderAddServices() {
               fullWidth
               slotProps={{ inputLabel: { shrink: true } }}
             />
-            <TextField
-              label="Special Instructions"
-              value={specialInstructions}
-              onChange={(e) => setSpecialInstructions(e.target.value)}
-              multiline
-              minRows={2}
-              fullWidth
-            />
-            <TextField
-              label="Estimated Unit Price"
-              type="number"
-              value={unitPrice}
-              onChange={(e) => setUnitPrice(e.target.value)}
-              fullWidth
-              slotProps={{ input: { startAdornment: <InputAdornment position="start">$</InputAdornment> } }}
-            />
+            <Box>
+              <Typography sx={{ color: palette.hullGray, fontSize: 12, mb: 1 }}>
+                File Attachment (Excel, PDF, JPG, PNG, DOCX)
+              </Typography>
+              {file ? (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, bgcolor: palette.oceanMid, p: 1.5, borderRadius: 1 }}>
+                  <Typography sx={{ color: palette.engineGreen, fontSize: 14, flexGrow: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    📎 {file.name}
+                  </Typography>
+                  <Button variant="text" color="error" size="small" onClick={() => setFile(undefined)}>
+                    Remove
+                  </Button>
+                </Box>
+              ) : (
+                <Button
+                  component="label"
+                  variant="outlined"
+                  sx={{ width: '100%', py: 1.5, borderStyle: 'dashed', borderColor: palette.steelBlue, color: palette.steelBlue }}
+                >
+                  Choose Excel or File
+                  <input
+                    type="file"
+                    hidden
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files.length > 0) {
+                        setFile(e.target.files[0]);
+                      }
+                    }}
+                  />
+                </Button>
+              )}
+            </Box>
 
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
               <Button onClick={closeSheet} sx={{ color: palette.hullGray }}>

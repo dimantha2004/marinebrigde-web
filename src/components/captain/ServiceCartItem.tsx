@@ -38,9 +38,15 @@ export default function ServiceCartItem({ item, onEdit, onRemove }: ServiceCartI
         <Typography noWrap sx={{ color: palette.fogWhite, fontWeight: 600, fontSize: 15 }}>
           {item.serviceName}
         </Typography>
-        <Typography sx={{ color: palette.hullGray, fontSize: 13 }}>
-          {item.quantity} {item.unit} · ${item.estimatedUnitPrice.toFixed(2)}/unit
-        </Typography>
+        {item.file ? (
+          <Typography noWrap sx={{ color: palette.engineGreen, fontSize: 13, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            📎 {item.file.name}
+          </Typography>
+        ) : (
+          <Typography sx={{ color: palette.hullGray, fontSize: 13 }}>
+            No file attached
+          </Typography>
+        )}
         {item.specifications && (
           <Typography noWrap sx={{ color: palette.hullGray, fontSize: 12 }}>
             {item.specifications}
@@ -49,10 +55,7 @@ export default function ServiceCartItem({ item, onEdit, onRemove }: ServiceCartI
       </Box>
 
       <Box sx={{ textAlign: 'right' }}>
-        <Typography sx={{ fontFamily: 'monospace', color: palette.fogWhite, fontSize: 15 }}>
-          ${item.estimatedTotalPrice.toFixed(2)}
-        </Typography>
-        <Box>
+        <Box sx={{ display: 'flex', gap: 0.5 }}>
           <IconButton size="small" onClick={() => onEdit?.(item)} aria-label="Edit item">
             <EditOutlined sx={{ fontSize: 18, color: palette.steelBlue }} />
           </IconButton>
