@@ -13,10 +13,6 @@ import OrderStatusBadge from '@/components/shared/OrderStatusBadge';
 import type { Order } from '@/types/database';
 import { palette, fonts } from '@/constants/theme';
 
-function formatAmount(value: number | null): string {
-  if (value == null) return '—';
-  return `$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
 
 export default function CharterApprovals() {
   const navigate = useNavigate();

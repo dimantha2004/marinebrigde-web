@@ -31,10 +31,6 @@ const CLAUSE_SERVICES = ['Bunkering', 'De-bunkering'];
 
 type Decision = 'approve' | 'reject';
 
-function formatAmount(value: number | null | undefined): string {
-  if (value == null) return '—';
-  return `$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
 
 export default function CharterOrderDetail() {
   const navigate = useNavigate();

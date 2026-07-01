@@ -170,9 +170,11 @@ export default function NewOrderCheckout() {
             type="number"
             value={customAmount}
             onChange={(e) => setCustomAmount(e.target.value)}
-            InputProps={{
-              startAdornment: <Typography sx={{ color: palette.hullGray, mr: 1 }}>$</Typography>,
-              sx: { color: palette.engineGreen, fontSize: 20, fontFamily: fonts.display, fontWeight: 'bold' }
+            slotProps={{
+              input: {
+                startAdornment: <Typography sx={{ color: palette.hullGray, mr: 1 }}>$</Typography>,
+                sx: { color: palette.engineGreen, fontSize: 20, fontFamily: fonts.display, fontWeight: 'bold' }
+              }
             }}
             sx={{
               '& .MuiOutlinedInput-root': {
