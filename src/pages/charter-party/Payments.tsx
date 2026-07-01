@@ -18,20 +18,20 @@ function formatAmount(value: number | null): string {
   return `$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-export default function CharterApprovals() {
+export default function CharterPayments() {
   const navigate = useNavigate();
   const userId = useAuthStore((s) => s.session?.user?.id ?? null);
   const { data: orders, isLoading, error } = useOrders('charter_party', userId);
 
   const pending = useMemo(
-    () => orders.filter((o: Order) => o.overall_status === 'pending_charter_approval'),
+    () => orders.filter((o: Order) => o.overall_status === 'pending_payment'),
     [orders]
   );
 
   return (
     <Box>
       <Typography sx={{ fontFamily: fonts.display, color: palette.fogWhite, fontSize: 22, mb: 2 }}>
-        Approval Requests
+        Payments
       </Typography>
 
       {isLoading ? (
@@ -41,13 +41,13 @@ export default function CharterApprovals() {
       ) : error ? (
         <Box sx={{ textAlign: 'center', py: 4 }}>
           <WarningAmber sx={{ color: palette.alertRed, fontSize: 28 }} />
-          <Typography sx={{ color: palette.hullGray, mt: 1 }}>Couldn't load approval requests.</Typography>
+          <Typography sx={{ color: palette.hullGray, mt: 1 }}>Couldn't load payments.</Typography>
         </Box>
       ) : pending.length === 0 ? (
         <Box sx={{ textAlign: 'center', py: 6 }}>
           <TaskAltOutlined sx={{ color: palette.hullGray, fontSize: 36 }} />
           <Typography sx={{ color: palette.hullGray, mt: 1 }}>
-            No pending approvals. You're all caught up.
+            No pending payments. You're all caught up.
           </Typography>
         </Box>
       ) : (

@@ -124,7 +124,7 @@ export default function AdminSettings() {
 
       <Typography sx={{ fontWeight: 600, color: palette.fogWhite, fontSize: 16, mb: 1 }}>App Info</Typography>
       <Card sx={{ p: 2, mb: 3 }}>
-        <InfoRow label="Application" value="Marinebridge" />
+        <InfoRow label="Application" value="MarineBridge" />
         <InfoRow label="Role" value="Administrator" />
         <InfoRow label="Environment" value="Web (Vite + React)" />
       </Card>

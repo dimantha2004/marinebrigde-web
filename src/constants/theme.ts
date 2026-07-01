@@ -1,7 +1,7 @@
 import { createTheme } from '@mui/material/styles';
 
 /**
- * Marinebridge design system — "Maritime-industrial".
+ * MarineBridge design system — "Maritime-industrial".
  * Deep ocean authority meets operational precision.
  * Ported from the mobile app's constants/theme.ts.
  */

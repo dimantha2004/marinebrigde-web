@@ -10,6 +10,8 @@ import {
   DialogContent,
   TextField,
   IconButton,
+  MenuItem,
+  ListSubheader,
 } from '@mui/material';
 import ArrowBack from '@mui/icons-material/ArrowBack';
 import WarningAmber from '@mui/icons-material/WarningAmber';
@@ -23,6 +25,12 @@ import ServiceCategoryIcon from '@/components/shared/ServiceCategoryIcon';
 import type { ServiceCategory } from '@/types/database';
 import { palette, fonts } from '@/constants/theme';
 
+const FUEL_TYPES = [
+  { group: 'DM Grade', options: ['DMX', 'DMA', 'DMZ', 'DMB'] },
+  { group: 'DF Grade', options: ['DFA', 'DFZ', 'DFB'] },
+  { group: 'RM Grade', options: ['RMA', 'RMB', 'RMD', 'RME', 'RMG', 'RMK'] },
+];
+
 export default function NewOrderAddServices() {
   const navigate = useNavigate();
   const items = useCartStore((s) => s.items);
@@ -34,6 +42,10 @@ export default function NewOrderAddServices() {
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const [activeName, setActiveName] = useState<string | null>(null);
+  const [fuelType, setFuelType] = useState('');
+  const [quantity, setQuantity] = useState('1');
+  const [unit, setUnit] = useState('MT');
+  const [specialInstructions, setSpecialInstructions] = useState('');
   const [specifications, setSpecifications] = useState('');
   const [requestedDatetime, setRequestedDatetime] = useState('');
   const [file, setFile] = useState<File | undefined>(undefined);
@@ -63,8 +75,26 @@ export default function NewOrderAddServices() {
   const openSheet = (name: string) => {
     const categoryId = categoryIdByName.get(name);
     const existing = categoryId ? getItem(categoryId) : undefined;
+    
+    let existingFuel = '';
+    let existingSpecs = existing?.specifications ?? '';
+    if (existingSpecs.startsWith('Fuel Type: ')) {
+      const firstLineEnd = existingSpecs.indexOf('\n');
+      if (firstLineEnd !== -1) {
+        existingFuel = existingSpecs.substring(11, firstLineEnd);
+        existingSpecs = existingSpecs.substring(firstLineEnd + 1).trim();
+      } else {
+        existingFuel = existingSpecs.substring(11);
+        existingSpecs = '';
+      }
+    }
+    
     setActiveName(name);
-    setSpecifications(existing?.specifications ?? '');
+    setFuelType(existingFuel);
+    setQuantity(existing?.quantity?.toString() ?? '1');
+    setUnit(existing?.unit ?? 'MT');
+    setSpecialInstructions(existing?.specialInstructions ?? '');
+    setSpecifications(existingSpecs);
     setRequestedDatetime(existing?.requestedDatetime ?? '');
     setFile(existing?.file);
   };
@@ -79,18 +109,26 @@ export default function NewOrderAddServices() {
       closeSheet();
       return;
     }
+    
+    const isSpecialService = activeName === 'Bunkering' || activeName === 'De-bunkering' || activeName === 'Fresh Water Supply';
+    const isFuelRequired = activeName === 'Bunkering' || activeName === 'De-bunkering';
+    
+    const finalSpecs = isFuelRequired && fuelType
+      ? `Fuel Type: ${fuelType}${specifications.trim() ? '\n' + specifications.trim() : ''}`
+      : specifications.trim();
+
     addOrUpdateItem({
       serviceCategoryId: categoryId,
       serviceName: activeName,
       iconName: serviceIconFor(activeName),
-      quantity: 1,
-      unit: 'units',
-      specifications: specifications.trim(),
-      specialInstructions: '',
+      quantity: Number(quantity) || 1,
+      unit: unit.trim() || 'MT',
+      specifications: finalSpecs,
+      specialInstructions: specialInstructions.trim(),
       requestedDatetime: requestedDatetime.trim() || null,
       estimatedUnitPrice: 0,
       estimatedTotalPrice: 0,
-      file,
+      file: isSpecialService ? undefined : file,
     });
     closeSheet();
   };
@@ -234,61 +272,129 @@ export default function NewOrderAddServices() {
           </Box>
 
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <TextField
-              label="Manual Message / Order Details"
-              placeholder="Type your message, list requirements, or notes here..."
-              value={specifications}
-              onChange={(e) => setSpecifications(e.target.value)}
-              multiline
-              minRows={4}
-              fullWidth
-            />
-            <TextField
-              label="Requested Date/Time"
-              type="datetime-local"
-              value={requestedDatetime}
-              onChange={(e) => setRequestedDatetime(e.target.value)}
-              fullWidth
-              slotProps={{ inputLabel: { shrink: true } }}
-            />
-            <Box>
-              <Typography sx={{ color: palette.hullGray, fontSize: 12, mb: 1 }}>
-                File Attachment (Excel, PDF, JPG, PNG, DOCX)
-              </Typography>
-              {file ? (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, bgcolor: palette.oceanMid, p: 1.5, borderRadius: 1 }}>
-                  <Typography sx={{ color: palette.engineGreen, fontSize: 14, flexGrow: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    📎 {file.name}
-                  </Typography>
-                  <Button variant="text" color="error" size="small" onClick={() => setFile(undefined)}>
-                    Remove
-                  </Button>
-                </Box>
-              ) : (
-                <Button
-                  component="label"
-                  variant="outlined"
-                  sx={{ width: '100%', py: 1.5, borderStyle: 'dashed', borderColor: palette.steelBlue, color: palette.steelBlue }}
-                >
-                  Choose Excel or File
-                  <input
-                    type="file"
-                    hidden
-                    onChange={(e) => {
-                      if (e.target.files && e.target.files.length > 0) {
-                        setFile(e.target.files[0]);
-                      }
-                    }}
+            {(activeName === 'Bunkering' || activeName === 'De-bunkering' || activeName === 'Fresh Water Supply') ? (
+              <>
+                <Box sx={{ display: 'flex', gap: 2 }}>
+                  <TextField
+                    label="Quantity"
+                    type="number"
+                    value={quantity}
+                    onChange={(e) => setQuantity(e.target.value)}
+                    fullWidth
                   />
-                </Button>
-              )}
-            </Box>
+                  <TextField
+                    select
+                    label="Unit"
+                    value={unit}
+                    onChange={(e) => setUnit(e.target.value)}
+                    fullWidth
+                  >
+                    {['MT', 'litres', 'm3', 'kg'].map((opt) => (
+                      <MenuItem key={opt} value={opt}>
+                        {opt}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                </Box>
+
+                {(activeName === 'Bunkering' || activeName === 'De-bunkering') && (
+                  <TextField
+                    select
+                    label="Fuel Type"
+                    value={fuelType}
+                    onChange={(e) => setFuelType(e.target.value)}
+                    fullWidth
+                  >
+                    {FUEL_TYPES.map((group) => [
+                      <ListSubheader key={group.group}>{group.group}</ListSubheader>,
+                      ...group.options.map((opt) => (
+                        <MenuItem key={opt} value={opt}>
+                          {opt}
+                        </MenuItem>
+                      )),
+                    ])}
+                  </TextField>
+                )}
+                <TextField
+                  label="Special Instructions"
+                  value={specialInstructions}
+                  onChange={(e) => setSpecialInstructions(e.target.value)}
+                  multiline
+                  minRows={2}
+                  fullWidth
+                />
+                <TextField
+                  label="Requested Date/Time"
+                  type="datetime-local"
+                  value={requestedDatetime}
+                  onChange={(e) => setRequestedDatetime(e.target.value)}
+                  fullWidth
+                  slotProps={{ inputLabel: { shrink: true } }}
+                />
+              </>
+            ) : (
+              <>
+                <TextField
+                  label="Manual Message / Order Details"
+                  placeholder="Type your message, list requirements, or notes here..."
+                  value={specifications}
+                  onChange={(e) => setSpecifications(e.target.value)}
+                  multiline
+                  minRows={4}
+                  fullWidth
+                />
+                <TextField
+                  label="Requested Date/Time"
+                  type="datetime-local"
+                  value={requestedDatetime}
+                  onChange={(e) => setRequestedDatetime(e.target.value)}
+                  fullWidth
+                  slotProps={{ inputLabel: { shrink: true } }}
+                />
+                <Box>
+                  <Typography sx={{ color: palette.hullGray, fontSize: 12, mb: 1 }}>
+                    File Attachment (Excel, PDF, JPG, PNG, DOCX)
+                  </Typography>
+                  {file ? (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, bgcolor: palette.oceanMid, p: 1.5, borderRadius: 1 }}>
+                      <Typography sx={{ color: palette.engineGreen, fontSize: 14, flexGrow: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        📎 {file.name}
+                      </Typography>
+                      <Button variant="text" color="error" size="small" onClick={() => setFile(undefined)}>
+                        Remove
+                      </Button>
+                    </Box>
+                  ) : (
+                    <Button
+                      component="label"
+                      variant="outlined"
+                      sx={{ width: '100%', py: 1.5, borderStyle: 'dashed', borderColor: palette.steelBlue, color: palette.steelBlue }}
+                    >
+                      Choose Excel or File
+                      <input
+                        type="file"
+                        hidden
+                        onChange={(e) => {
+                          if (e.target.files && e.target.files.length > 0) {
+                            setFile(e.target.files[0]);
+                          }
+                        }}
+                      />
+                    </Button>
+                  )}
+                </Box>
+              </>
+            )}
 
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
               <Button onClick={closeSheet} sx={{ color: palette.hullGray }}>
                 Cancel
               </Button>
-              <Button variant="contained" onClick={saveItem}>
+              <Button 
+                variant="contained" 
+                onClick={saveItem}
+                disabled={(activeName === 'Bunkering' || activeName === 'De-bunkering') && !fuelType}
+              >
                 Add to Cart
               </Button>
             </Box>

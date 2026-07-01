@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Box,
@@ -10,6 +10,7 @@ import {
   Snackbar,
   Alert,
   IconButton,
+  TextField,
 } from '@mui/material';
 import ArrowBack from '@mui/icons-material/ArrowBack';
 import WarningAmber from '@mui/icons-material/WarningAmber';
@@ -36,9 +37,17 @@ export default function NewOrderCheckout() {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
   const [snack, setSnack] = useState<string | null>(null);
+  const [customAmount, setCustomAmount] = useState<string>('');
+  
+
+  useEffect(() => {
+    if (order?.total_amount) {
+      setCustomAmount(order.total_amount.toString());
+    }
+  }, [order?.total_amount]);
 
   const finish = () => {
-    if (orderId) navigate(`/captain/orders/${orderId}`, { replace: true });
+    if (orderId) navigate(`/charter-party/order/${orderId}`, { replace: true });
     else navigate(-1);
   };
 
@@ -48,7 +57,7 @@ export default function NewOrderCheckout() {
     setSnack(null);
     try {
       const { data, error: fnError } = await supabase.functions.invoke('create-payment-intent', {
-        body: { order_id: orderId },
+        body: { order_id: orderId, custom_amount: customAmount || null },
       });
       if (fnError || !data?.paymentIntent) {
         setSnack('Could not start payment. Please try again.');
@@ -69,7 +78,7 @@ export default function NewOrderCheckout() {
     try {
       const { error: updError } = await supabase
         .from('orders')
-        .update({ payment_method: 'cod' })
+        .update({ payment_method: 'cod', total_amount: customAmount ? Number(customAmount) : order?.total_amount })
         .eq('id', orderId);
       if (updError) {
         setSnack(updError.message);
@@ -95,8 +104,17 @@ export default function NewOrderCheckout() {
     }
   };
 
-  const onPaid = () => {
+  const onPaid = async () => {
     setSnack('Payment received. Activating your order…');
+    if (orderId) {
+      await supabase
+        .from('orders')
+        .update({ payment_method: 'online', total_amount: customAmount ? Number(customAmount) : order?.total_amount })
+        .eq('id', orderId);
+      await supabase.functions.invoke('activate-order', {
+        body: { order_id: orderId },
+      });
+    }
     queryClient.invalidateQueries({ queryKey: ['orders'] });
     if (orderId) queryClient.invalidateQueries({ queryKey: ['order', orderId] });
     setTimeout(finish, 800);
@@ -145,11 +163,25 @@ export default function NewOrderCheckout() {
         <Typography sx={{ fontFamily: fonts.display, color: palette.fogWhite, fontSize: 18 }}>
           {order.vessel_name}
         </Typography>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
-          <Typography sx={{ color: palette.fogWhite, fontWeight: 500, fontSize: 15 }}>Amount Due</Typography>
-          <Typography sx={{ fontFamily: fonts.display, color: palette.engineGreen, fontSize: 22 }}>
-            ${(order.total_amount ?? 0).toFixed(2)}
-          </Typography>
+        <Box sx={{ mt: 2 }}>
+          <Typography sx={{ color: palette.fogWhite, fontWeight: 500, fontSize: 15, mb: 1 }}>Amount to Pay (USD)</Typography>
+          <TextField
+            fullWidth
+            type="number"
+            value={customAmount}
+            onChange={(e) => setCustomAmount(e.target.value)}
+            InputProps={{
+              startAdornment: <Typography sx={{ color: palette.hullGray, mr: 1 }}>$</Typography>,
+              sx: { color: palette.engineGreen, fontSize: 20, fontFamily: fonts.display, fontWeight: 'bold' }
+            }}
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': { borderColor: palette.navyDeep },
+                '&:hover fieldset': { borderColor: palette.steelBlue },
+                '&.Mui-focused fieldset': { borderColor: palette.steelBlue },
+              }
+            }}
+          />
         </Box>
       </Card>
 

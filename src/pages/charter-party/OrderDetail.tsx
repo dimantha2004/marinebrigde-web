@@ -12,6 +12,7 @@ import {
   IconButton,
 } from '@mui/material';
 import ArrowBack from '@mui/icons-material/ArrowBack';
+import CreditCard from '@mui/icons-material/CreditCard';
 import WarningAmber from '@mui/icons-material/WarningAmber';
 import ErrorOutlined from '@mui/icons-material/ErrorOutlined';
 import InfoOutlined from '@mui/icons-material/InfoOutlined';
@@ -58,6 +59,7 @@ export default function CharterOrderDetail() {
   );
 
   const decided = order != null && order.overall_status !== 'pending_charter_approval';
+  const canPay = order?.overall_status === 'pending_payment';
 
   const submitDecision = async (decision: Decision) => {
     if (!orderId || submitting) return;
@@ -174,17 +176,11 @@ export default function CharterOrderDetail() {
                 <Typography noWrap sx={{ color: palette.fogWhite, fontWeight: 600, fontSize: 15, flex: 1 }}>
                   {name}
                 </Typography>
-                <Typography sx={{ fontFamily: 'monospace', color: palette.fogWhite, fontSize: 14 }}>
-                  {formatAmount(line.total_price)}
-                </Typography>
               </Box>
               <Box sx={{ display: 'flex', gap: 2, mt: 1 }}>
                 <Typography sx={{ color: palette.hullGray, fontSize: 13 }}>
                   Qty: {line.quantity ?? '—'} {line.unit ?? ''}
                 </Typography>
-                {line.unit_price != null && (
-                  <Typography sx={{ color: palette.hullGray, fontSize: 13 }}>@ {formatAmount(line.unit_price)}</Typography>
-                )}
               </Box>
               {line.specifications && (
                 <Typography sx={{ color: palette.fogWhite, fontSize: 13, mt: 1 }}>{line.specifications}</Typography>
@@ -195,19 +191,26 @@ export default function CharterOrderDetail() {
         })
       )}
 
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', my: 2 }}>
-        <Typography sx={{ color: palette.fogWhite, fontWeight: 600, fontSize: 15 }}>Order Total</Typography>
-        <Typography sx={{ fontFamily: fonts.display, color: palette.signalAmber, fontSize: 22 }}>
-          {formatAmount(order.total_amount)}
-        </Typography>
-      </Box>
+
 
       {decided ? (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, bgcolor: palette.oceanMid, borderRadius: `${radius.md}px`, p: 2 }}>
-          <InfoOutlined sx={{ color: palette.hullGray, fontSize: 18 }} />
-          <Typography sx={{ color: palette.hullGray, fontSize: 13 }}>
-            This order is no longer pending charter approval.
-          </Typography>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, bgcolor: palette.oceanMid, borderRadius: `${radius.md}px`, p: 2 }}>
+            <InfoOutlined sx={{ color: palette.hullGray, fontSize: 18 }} />
+            <Typography sx={{ color: palette.hullGray, fontSize: 13 }}>
+              This order is no longer pending charter approval.
+            </Typography>
+          </Box>
+          {canPay && (
+            <Button
+              variant="contained"
+              startIcon={<CreditCard />}
+              sx={{ height: 48, maxWidth: 360 }}
+              onClick={() => navigate(`/charter-party/checkout?id=${order.id}`)}
+            >
+              Pay Now
+            </Button>
+          )}
         </Box>
       ) : (
         <>

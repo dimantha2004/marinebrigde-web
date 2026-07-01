@@ -25,6 +25,7 @@ import NotificationsNone from '@mui/icons-material/NotificationsNone';
 import Person from '@mui/icons-material/Person';
 import CheckCircleOutlined from '@mui/icons-material/CheckCircleOutlined';
 import History from '@mui/icons-material/History';
+import Payments from '@mui/icons-material/Payments';
 import Speed from '@mui/icons-material/Speed';
 import VerifiedUser from '@mui/icons-material/VerifiedUser';
 import Explore from '@mui/icons-material/Explore';
@@ -72,6 +73,7 @@ const NAV: Record<UserRole, { base: string; items: NavItem[] }> = {
     base: '/charter-party',
     items: [
       { label: 'Approvals', path: 'approvals', icon: CheckCircleOutlined },
+      { label: 'Payments', path: 'payments', icon: Payments },
       { label: 'History', path: 'history', icon: History },
       { label: 'Profile', path: 'profile', icon: Person },
     ],
@@ -155,7 +157,7 @@ export default function AppShell({ role }: { role: UserRole }) {
           <DirectionsBoat sx={{ color: palette.fogWhite }} />
         </Box>
         <Typography sx={{ fontFamily: fonts.display, fontSize: 18, letterSpacing: 1, color: palette.fogWhite }}>
-          Marinebridge
+          MarineBridge
         </Typography>
       </Box>
       <Divider sx={{ borderColor: palette.surfaceVariant }} />

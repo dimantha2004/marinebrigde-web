@@ -21,7 +21,6 @@ import WarningAmber from '@mui/icons-material/WarningAmber';
 import LocationOnOutlined from '@mui/icons-material/LocationOnOutlined';
 import AccessTime from '@mui/icons-material/AccessTime';
 import ChatBubbleOutlined from '@mui/icons-material/ChatBubbleOutlined';
-import CreditCard from '@mui/icons-material/CreditCard';
 import Close from '@mui/icons-material/Close';
 import { useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
@@ -126,7 +125,6 @@ export default function CaptainOrderDetail() {
   }
 
   const canCancel = CANCELLABLE.includes(order.overall_status);
-  const canPay = order.overall_status === 'pending_payment';
 
   return (
     <Box>
@@ -230,16 +228,6 @@ export default function CaptainOrderDetail() {
       )}
 
       <Box sx={{ mt: 3, display: 'flex', flexDirection: 'column', gap: 1, maxWidth: 360 }}>
-        {canPay && (
-          <Button
-            variant="contained"
-            startIcon={<CreditCard />}
-            sx={{ height: 48 }}
-            onClick={() => navigate(`/captain/new-order/checkout?id=${order.id}`)}
-          >
-            Pay Now
-          </Button>
-        )}
         {canCancel && (
           <Button
             variant="outlined"

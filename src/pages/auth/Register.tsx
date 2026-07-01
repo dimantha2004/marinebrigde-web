@@ -36,6 +36,7 @@ interface RoleField {
   label: string;
   required: boolean;
   type?: string;
+  options?: { value: string; label: string }[];
 }
 
 const ROLE_FIELDS: Record<UserRole, RoleField[]> = {
@@ -49,6 +50,7 @@ const ROLE_FIELDS: Record<UserRole, RoleField[]> = {
     { key: 'contract_date', label: 'Contract Date', required: true, type: 'date' },
   ],
   ship_agent: [
+    { key: 'agent_type', label: 'Agent Type', required: true, type: 'select', options: [{ value: 'liner', label: 'Liner Shipping Agent' }, { value: 'tramp', label: 'Tramp Shipping Agent' }] },
     { key: 'company_reg_no', label: 'Company Registration No', required: true },
     { key: 'imo_agent_code', label: 'IMO Agent Code', required: true },
     { key: 'tin_no', label: 'TIN No', required: true },
@@ -241,6 +243,25 @@ export default function Register() {
                   {serviceCategories.map((cat) => (
                     <MenuItem key={cat.id} value={cat.id}>
                       {cat.name}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              );
+            }
+            if (field.type === 'select' && field.options) {
+              return (
+                <TextField
+                  key={field.key}
+                  select
+                  label={field.label}
+                  value={extraFields[field.key] ?? ''}
+                  onChange={(e) => setExtra(field.key, e.target.value)}
+                  disabled={submitting}
+                  fullWidth
+                >
+                  {field.options.map((opt) => (
+                    <MenuItem key={opt.value} value={opt.value}>
+                      {opt.label}
                     </MenuItem>
                   ))}
                 </TextField>

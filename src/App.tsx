@@ -23,14 +23,15 @@ import CaptainProfile from '@/pages/captain/Profile';
 import NewOrderStart from '@/pages/captain/new-order/Start';
 import NewOrderAddServices from '@/pages/captain/new-order/AddServices';
 import NewOrderCart from '@/pages/captain/new-order/Cart';
-import NewOrderCheckout from '@/pages/captain/new-order/Checkout';
 
 
 
 // Charter party
 import CharterApprovals from '@/pages/charter-party/Approvals';
+import CharterPayments from '@/pages/charter-party/Payments';
 import CharterHistory from '@/pages/charter-party/History';
 import CharterOrderDetail from '@/pages/charter-party/OrderDetail';
+import CharterCheckout from '@/pages/charter-party/Checkout';
 import CharterProfile from '@/pages/charter-party/Profile';
 
 // Port authority
@@ -209,7 +210,6 @@ export default function App() {
         <Route path="new-order" element={<NewOrderStart />} />
         <Route path="new-order/add-services" element={<NewOrderAddServices />} />
         <Route path="new-order/cart" element={<NewOrderCart />} />
-        <Route path="new-order/checkout" element={<NewOrderCheckout />} />
       </Route>
 
 
@@ -218,8 +218,10 @@ export default function App() {
       <Route path="/charter-party" element={<RequireRole role="charter_party"><AppShell role="charter_party" /></RequireRole>}>
         <Route index element={<Navigate to="approvals" replace />} />
         <Route path="approvals" element={<CharterApprovals />} />
+        <Route path="payments" element={<CharterPayments />} />
         <Route path="history" element={<CharterHistory />} />
         <Route path="order/:orderId" element={<CharterOrderDetail />} />
+        <Route path="checkout" element={<CharterCheckout />} />
         <Route path="profile" element={<CharterProfile />} />
       </Route>
 

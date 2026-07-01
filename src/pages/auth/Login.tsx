@@ -80,7 +80,7 @@ export default function Login() {
           <Typography
             sx={{ fontFamily: fonts.display, fontSize: 40, letterSpacing: 4, color: palette.fogWhite }}
           >
-            Marinebridge
+            MarineBridge
           </Typography>
           <Typography sx={{ color: palette.hullGray, mt: 0.5 }}>
             Maritime provisioning, coordinated.
@@ -141,7 +141,7 @@ export default function Login() {
           </Button>
 
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 1 }}>
-            <Typography sx={{ color: palette.hullGray }}>New to Marinebridge?&nbsp;</Typography>
+            <Typography sx={{ color: palette.hullGray }}>New to MarineBridge?&nbsp;</Typography>
             <Link component={RouterLink} to="/register" sx={{ fontWeight: 600, color: palette.steelBlue }}>
               Create an account
             </Link>
