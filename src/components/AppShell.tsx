@@ -31,7 +31,6 @@ import Explore from '@mui/icons-material/Explore';
 import Description from '@mui/icons-material/Description';
 import People from '@mui/icons-material/People';
 import MonitorHeart from '@mui/icons-material/MonitorHeart';
-import AccountTree from '@mui/icons-material/AccountTree';
 import Settings from '@mui/icons-material/Settings';
 import Logout from '@mui/icons-material/Logout';
 import Menu from '@mui/icons-material/Menu';

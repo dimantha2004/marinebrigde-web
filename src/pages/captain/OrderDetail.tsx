@@ -176,10 +176,6 @@ export default function CaptainOrderDetail() {
         <Typography sx={{ color: palette.hullGray, mb: 1 }}>No services on this order.</Typography>
       ) : (
         lineItems.map((li) => {
-          const supplierName =
-            li.supplier_mapping?.supplier_profile?.company_name ??
-            li.supplier_mapping?.supplier_profile?.full_name ??
-            null;
           return (
             <Accordion key={li.id} disableGutters sx={{ mb: 1, bgcolor: palette.oceanMid, '&:before': { display: 'none' } }}>
               <AccordionSummary expandIcon={<ExpandMore sx={{ color: palette.hullGray }} />}>

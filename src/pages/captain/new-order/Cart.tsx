@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Button, Card, Typography, Divider, Snackbar, Alert, IconButton, CircularProgress } from '@mui/material';
+import { Box, Button, Card, Typography, Snackbar, Alert, IconButton, CircularProgress } from '@mui/material';
 import ArrowBack from '@mui/icons-material/ArrowBack';
 import LocationOnOutlined from '@mui/icons-material/LocationOnOutlined';
 import BusinessOutlined from '@mui/icons-material/BusinessOutlined';

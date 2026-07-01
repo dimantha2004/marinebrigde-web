@@ -9,8 +9,6 @@ import {
   Dialog,
   DialogContent,
   TextField,
-  Chip,
-  InputAdornment,
   IconButton,
 } from '@mui/material';
 import ArrowBack from '@mui/icons-material/ArrowBack';
@@ -20,7 +18,7 @@ import ShoppingCart from '@mui/icons-material/ShoppingCart';
 
 import { supabase } from '@/lib/supabase';
 import { useCartStore } from '@/stores/cartStore';
-import { SERVICE_CATEGORIES, COMMON_UNITS, serviceIconFor, muiIconFor } from '@/constants/serviceCategories';
+import { SERVICE_CATEGORIES, serviceIconFor, muiIconFor } from '@/constants/serviceCategories';
 import ServiceCategoryIcon from '@/components/shared/ServiceCategoryIcon';
 import type { ServiceCategory } from '@/types/database';
 import { palette, fonts } from '@/constants/theme';

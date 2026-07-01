@@ -9,7 +9,6 @@ import {
   CircularProgress,
   Snackbar,
   Alert,
-  Divider,
   IconButton,
 } from '@mui/material';
 import ArrowBack from '@mui/icons-material/ArrowBack';
@@ -22,7 +21,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 
 import { supabase } from '@/lib/supabase';
-import { useOrderDetail, type LineItemDetail } from '@/hooks/useOrderDetail';
+import { useOrderDetail } from '@/hooks/useOrderDetail';
 import OrderStatusBadge from '@/components/shared/OrderStatusBadge';
 import ServiceCategoryIcon from '@/components/shared/ServiceCategoryIcon';
 import { palette, fonts, radius } from '@/constants/theme';
@@ -34,12 +33,6 @@ type Decision = 'approve' | 'reject';
 function formatAmount(value: number | null | undefined): string {
   if (value == null) return '—';
   return `$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
-
-function supplierLabel(line: LineItemDetail): string | null {
-  const profile = line.supplier_mapping?.supplier_profile;
-  if (!profile) return null;
-  return profile.company_name || profile.full_name || null;
 }
 
 export default function CharterOrderDetail() {
