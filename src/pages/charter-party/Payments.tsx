@@ -20,7 +20,12 @@ export default function CharterPayments() {
   const { data: orders, isLoading, error } = useOrders('charter_party', userId);
 
   const pending = useMemo(
-    () => orders.filter((o: Order) => o.overall_status === 'pending_payment'),
+    () => orders.filter((o: Order & { order_line_items?: { line_status: string }[] }) => {
+      if (o.overall_status !== 'pending_payment') return false;
+      // Do not display if any line item is still waiting for supplier quotes
+      const hasPendingSupplier = o.order_line_items?.some(li => li.line_status === 'pending_supplier');
+      return !hasPendingSupplier;
+    }),
     [orders]
   );
 

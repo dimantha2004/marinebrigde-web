@@ -13,7 +13,7 @@ export function useOrders(role: UserRole | null | undefined, userId: string | nu
     queryKey: ['orders', userId, role],
     enabled: !!userId,
     queryFn: async () => {
-      let q = supabase.from('orders').select('*').order('created_at', { ascending: false });
+      let q = supabase.from('orders').select('*, order_line_items(line_status)').order('created_at', { ascending: false });
 
       if (userId) {
         if (role === 'charter_party') {
@@ -91,7 +91,7 @@ export function useCreateOrder() {
           requested_datetime: item.requestedDatetime,
           unit_price: item.estimatedUnitPrice,
           total_price: item.estimatedTotalPrice,
-          line_status: 'delivered' as const,
+          line_status: 'pending_supplier' as const,
         }));
 
         const { data: insertedLines, error: lineError } = await supabase

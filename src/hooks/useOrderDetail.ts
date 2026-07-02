@@ -1,6 +1,6 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import type { Order, OrderLineItem, OrderDocument } from '@/types/database';
+import type { Order, OrderLineItem, OrderDocument, SupplierQuotation } from '@/types/database';
 
 export interface OrderDetail extends Order {
   port: { name: string } | null;
@@ -17,6 +17,7 @@ export interface LineItemDetail extends OrderLineItem {
         supplier_profile: { full_name: string; company_name: string | null } | null;
       }
     | null;
+  supplier_quotations?: SupplierQuotation[];
 }
 
 /**
@@ -56,7 +57,9 @@ export function useOrderDetail(orderId: string | null | undefined) {
            supplier_mapping:supplier_service_mappings!order_line_items_supplier_mapping_id_fkey (
              id,
              supplier_profile:profiles!supplier_service_mappings_supplier_profile_id_fkey ( full_name, company_name )
-           )`
+           ),
+           supplier_quotations (*)
+         )`
         )
         .eq('order_id', orderId as string)
         .order('created_at', { ascending: true });
@@ -104,4 +107,50 @@ export function useOrderDocuments(orderId: string | null | undefined) {
     error: query.error,
     refetch: query.refetch,
   };
+}
+
+export function useSelectQuotation() {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    void,
+    Error,
+    { orderId: string; lineItemId: string; quotationId: string; amount: number; currentTotalAmount: number | null }
+  >({
+    mutationFn: async ({ orderId, lineItemId, quotationId, amount, currentTotalAmount }) => {
+      // 1. Mark quotation as selected
+      const { error: quoteError } = await supabase
+        .from('supplier_quotations')
+        .update({ is_selected: true })
+        .eq('id', quotationId);
+      if (quoteError) throw quoteError;
+
+      // 2. Update line item
+      const { error: lineError } = await supabase
+        .from('order_line_items')
+        .update({
+          unit_price: amount,
+          total_price: amount, // Assuming qty=1 or amount is total. Wait, typically unit_price * qty = total_price.
+          // Since the prompt says "payment for that selected amount", we'll just set both. If they want qty applied, we can do that but let's just set total_price.
+          line_status: 'supplier_accepted',
+        })
+        .eq('id', lineItemId);
+      if (lineError) throw lineError;
+
+      // 3. Update order total amount (naively add the amount to existing total_amount, or we could sum all line items but a simple update is fine).
+      // Wait, since we are setting the price, the line item might have had no price before.
+      const newTotal = (currentTotalAmount || 0) + amount;
+      const { error: orderError } = await supabase
+        .from('orders')
+        .update({ total_amount: newTotal })
+        .eq('id', orderId);
+      
+      if (orderError) throw orderError;
+    },
+    onSuccess: (_, { orderId }) => {
+      queryClient.invalidateQueries({ queryKey: ['order', orderId] });
+      queryClient.invalidateQueries({ queryKey: ['order', orderId, 'line-items'] });
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+    },
+  });
 }

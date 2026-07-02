@@ -35,6 +35,7 @@ import DocumentCard from '@/components/shared/DocumentCard';
 import MessageThread from '@/components/shared/MessageThread';
 import ServiceCategoryIcon from '@/components/shared/ServiceCategoryIcon';
 import StatusUpdateSheet from '@/components/supplier/StatusUpdateSheet';
+import QuotationSubmitSheet from '@/components/supplier/QuotationSubmitSheet';
 import { SUPPLIER_NEXT_ACTIONS, type LineStatus } from '@/constants/orderStatuses';
 import type { OrderDocument } from '@/types/database';
 import { palette, fonts, radius } from '@/constants/theme';
@@ -58,6 +59,7 @@ export default function SupplierOrderDetail() {
   const orderContext = myLines[0]?.order ?? null;
 
   const [sheetLine, setSheetLine] = useState<SupplierLineItem | null>(null);
+  const [quoteSheetLine, setQuoteSheetLine] = useState<SupplierLineItem | null>(null);
   const [chatLine, setChatLine] = useState<SupplierLineItem | null>(null);
   const [uploadingFor, setUploadingFor] = useState<string | null>(null);
   const [snack, setSnack] = useState<string | null>(null);
@@ -276,7 +278,26 @@ export default function SupplierOrderDetail() {
             )}
 
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 2, flexWrap: 'wrap' }}>
-              {nextActions.length > 0 ? (
+              {li.line_status === 'pending_supplier' ? (
+                <>
+                  <Button
+                    variant="contained"
+                    startIcon={<SwapVertOutlined />}
+                    onClick={() => setQuoteSheetLine(li)}
+                    sx={{ flexGrow: 1 }}
+                  >
+                    Submit Quotations
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    startIcon={<SwapVertOutlined />}
+                    onClick={() => setSheetLine(li)}
+                    sx={{ flexGrow: 1, color: palette.alertRed, borderColor: palette.alertRed }}
+                  >
+                    Decline Order
+                  </Button>
+                </>
+              ) : nextActions.length > 0 ? (
                 <Button
                   variant="contained"
                   startIcon={<SwapVertOutlined />}
@@ -310,6 +331,16 @@ export default function SupplierOrderDetail() {
         hasDocument={sheetLine ? (docsByLine.get(sheetLine.id)?.length ?? 0) > 0 : false}
         onConfirm={() => {
           setSnack('Status updated.');
+          refetch();
+        }}
+      />
+
+      <QuotationSubmitSheet
+        open={quoteSheetLine !== null}
+        onClose={() => setQuoteSheetLine(null)}
+        lineItem={quoteSheetLine}
+        onConfirm={() => {
+          setSnack('Quotations submitted.');
           refetch();
         }}
       />

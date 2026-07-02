@@ -22,10 +22,12 @@ import { useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 
 import { supabase } from '@/lib/supabase';
-import { useOrderDetail } from '@/hooks/useOrderDetail';
+import { useOrderDetail, useSelectQuotation } from '@/hooks/useOrderDetail';
 import OrderStatusBadge from '@/components/shared/OrderStatusBadge';
 import ServiceCategoryIcon from '@/components/shared/ServiceCategoryIcon';
 import { palette, fonts, radius } from '@/constants/theme';
+import { openDocument } from '@/lib/storage';
+import Description from '@mui/icons-material/Description';
 
 const CLAUSE_SERVICES = ['Bunkering', 'De-bunkering'];
 
@@ -43,6 +45,7 @@ export default function CharterOrderDetail() {
   const { orderId } = useParams<{ orderId: string }>();
 
   const { order, lineItems, isLoading, error } = useOrderDetail(orderId);
+  const selectQuotation = useSelectQuotation();
 
   const [comments, setComments] = useState('');
   const [submitting, setSubmitting] = useState<Decision | null>(null);
@@ -60,7 +63,12 @@ export default function CharterOrderDetail() {
   );
 
   const decided = order != null && order.overall_status !== 'pending_charter_approval';
-  const canPay = order?.overall_status === 'pending_payment';
+  const hasPendingQuotationActions = lineItems?.some(
+    (li) => 
+      CLAUSE_SERVICES.includes(li.service_categories?.name ?? '') &&
+      (li.line_status === 'pending_supplier' || li.line_status === 'pending_charter_selection')
+  );
+  const canPay = order?.overall_status === 'pending_payment' && !hasPendingQuotationActions;
 
   const submitDecision = async (decision: Decision) => {
     if (!orderId || submitting) return;
@@ -199,6 +207,74 @@ export default function CharterOrderDetail() {
                   </Typography>
                 </Box>
               )}
+
+              {line.line_status === 'pending_charter_selection' && line.supplier_quotations && line.supplier_quotations.length > 0 && (
+                <Box sx={{ mt: 2, p: 2, borderRadius: `${radius.md}px`, bgcolor: 'rgba(255,255,255,0.03)' }}>
+                  <Typography sx={{ color: palette.fogWhite, fontWeight: 600, fontSize: 14, mb: 1 }}>
+                    Select Supplier Quotation
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    {line.supplier_quotations.filter(q => !q.is_selected).map((quote) => (
+                      <Box
+                        key={quote.id}
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          p: 1.5,
+                          borderRadius: 1,
+                          border: `1px solid ${palette.oceanMid}`,
+                        }}
+                      >
+                        <Box>
+                          <Typography sx={{ color: palette.fogWhite, fontWeight: 500 }}>
+                            {formatAmount(quote.amount)}
+                          </Typography>
+                          {quote.description && (
+                            <Typography sx={{ color: palette.hullGray, fontSize: 13 }}>
+                              {quote.description}
+                            </Typography>
+                          )}
+                          {quote.file_url && (
+                            <Button
+                              size="small"
+                              startIcon={<Description />}
+                              onClick={() => openDocument(quote.file_url!)}
+                              sx={{ mt: 0.5, color: palette.steelBlue, p: 0, justifyContent: 'flex-start', minWidth: 0, textTransform: 'none', fontSize: 12 }}
+                            >
+                              View Attachment
+                            </Button>
+                          )}
+                        </Box>
+                        <Button
+                          variant="contained"
+                          size="small"
+                          disabled={selectQuotation.isPending}
+                          onClick={() => {
+                            if (!order) return;
+                            selectQuotation.mutate(
+                              {
+                                orderId: order.id,
+                                lineItemId: line.id,
+                                quotationId: quote.id,
+                                amount: quote.amount,
+                                currentTotalAmount: order.total_amount,
+                              },
+                              {
+                                onSuccess: () => setSnackbar('Quotation selected successfully.'),
+                                onError: (err) => setSnackbar(err.message),
+                              }
+                            );
+                          }}
+                          sx={{ bgcolor: palette.steelBlue, '&:hover': { bgcolor: palette.oceanMid } }}
+                        >
+                          {selectQuotation.isPending ? <CircularProgress size={16} sx={{ color: palette.fogWhite }} /> : 'Select'}
+                        </Button>
+                      </Box>
+                    ))}
+                  </Box>
+                </Box>
+              )}
             </Card>
           );
         })
@@ -218,7 +294,7 @@ export default function CharterOrderDetail() {
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, bgcolor: palette.oceanMid, borderRadius: `${radius.md}px`, p: 2 }}>
             <InfoOutlined sx={{ color: palette.hullGray, fontSize: 18 }} />
             <Typography sx={{ color: palette.hullGray, fontSize: 13 }}>
-              This order is no longer pending charter approval.
+              This order is no longer pending charter approval. (Status: {order?.overall_status}, canPay: {canPay ? 'true' : 'false'}, pendingQuotes: {hasPendingQuotationActions ? 'true' : 'false'})
             </Typography>
           </Box>
           {canPay && (

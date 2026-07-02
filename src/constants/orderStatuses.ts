@@ -24,6 +24,8 @@ export type OverallStatus = (typeof OVERALL_STATUSES)[number];
  */
 export const LINE_STATUSES = [
   'pending_supplier',
+  'supplier_quoted',
+  'pending_charter_selection',
   'supplier_accepted',
   'supplier_declined',
   'preparing',
@@ -51,6 +53,8 @@ export const OVERALL_STATUS_META: Record<OverallStatus, StatusMeta> = {
 
 export const LINE_STATUS_META: Record<LineStatus, StatusMeta> = {
   pending_supplier: { label: 'Awaiting Supplier', color: palette.signalAmber },
+  supplier_quoted: { label: 'Supplier Quoted', color: palette.steelBlue },
+  pending_charter_selection: { label: 'Pending Quote Selection', color: palette.signalAmber },
   supplier_accepted: { label: 'Accepted', color: palette.steelBlue },
   supplier_declined: { label: 'Declined', color: palette.alertRed },
   preparing: { label: 'Preparing', color: palette.steelBlue },
@@ -80,6 +84,7 @@ export const SUPPLIER_NEXT_ACTIONS: Partial<
   Record<LineStatus, { next: LineStatus; label: string; requiresDocument?: boolean }[]>
 > = {
   pending_supplier: [
+    { next: 'pending_charter_selection', label: 'Submit Quotations' },
     { next: 'supplier_accepted', label: 'Accept Order' },
     { next: 'supplier_declined', label: 'Decline Order' },
   ],

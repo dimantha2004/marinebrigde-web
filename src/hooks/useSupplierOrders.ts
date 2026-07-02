@@ -93,3 +93,45 @@ export function useUpdateLineStatus() {
     },
   });
 }
+
+export interface QuotationPayload {
+  amount: number;
+  description?: string;
+  fileUrl?: string;
+}
+
+export function useSubmitQuotations() {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, { lineItemId: string; quotes: QuotationPayload[] }>({
+    mutationFn: async ({ lineItemId, quotes }) => {
+      if (!quotes.length) throw new Error('At least one quotation is required.');
+
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) throw userError ?? new Error('Not authenticated.');
+
+      // 1. Insert quotations
+      const inserts = quotes.map((q) => ({
+        order_line_item_id: lineItemId,
+        amount: q.amount,
+        description: q.description || null,
+        file_url: q.fileUrl || null,
+        supplier_profile_id: user.id,
+      }));
+
+      const { error: insertError } = await supabase.from('supplier_quotations').insert(inserts);
+      if (insertError) throw insertError;
+
+      // 2. Update line item status
+      const { error: updateError } = await supabase
+        .from('order_line_items')
+        .update({ line_status: 'pending_charter_selection' })
+        .eq('id', lineItemId);
+      if (updateError) throw updateError;
+    },
+    onSuccess: (_, { lineItemId }) => {
+      queryClient.invalidateQueries({ queryKey: ['supplier-orders'] });
+      // We don't have order_id here easily without fetching, but invalidating 'supplier-orders' refreshes the list
+    },
+  });
+}
