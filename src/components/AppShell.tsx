@@ -26,8 +26,6 @@ import Person from '@mui/icons-material/Person';
 import CheckCircleOutlined from '@mui/icons-material/CheckCircleOutlined';
 import History from '@mui/icons-material/History';
 import Payments from '@mui/icons-material/Payments';
-import Speed from '@mui/icons-material/Speed';
-import VerifiedUser from '@mui/icons-material/VerifiedUser';
 import Explore from '@mui/icons-material/Explore';
 import Description from '@mui/icons-material/Description';
 import People from '@mui/icons-material/People';

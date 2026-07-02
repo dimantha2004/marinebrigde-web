@@ -52,7 +52,12 @@ export default function AdminPorts() {
         locode: locode.trim() ? locode.trim().toUpperCase() : null,
         active,
       });
-      if (insErr) throw insErr;
+      if (insErr) {
+        if (insErr.code === '23505') {
+          throw new Error('A port with this UN/LOCODE already exists.');
+        }
+        throw new Error(insErr.message);
+      }
     },
     onSuccess: () => {
       setSnack('Port added.');
@@ -69,7 +74,7 @@ export default function AdminPorts() {
   const toggleMutation = useMutation({
     mutationFn: async ({ id, next }: { id: string; next: boolean }) => {
       const { error: updErr } = await supabase.from('ports').update({ active: next }).eq('id', id);
-      if (updErr) throw updErr;
+      if (updErr) throw new Error(updErr.message);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'ports'] }),
     onError: (e: unknown) => setSnack(e instanceof Error ? e.message : 'Failed to update port.'),

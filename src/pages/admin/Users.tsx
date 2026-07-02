@@ -114,7 +114,7 @@ export default function AdminUsers() {
   const verifyMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error: updErr } = await supabase.from('profiles').update({ verified: true }).eq('id', id);
-      if (updErr) throw updErr;
+      if (updErr) throw new Error(updErr.message);
     },
     onSuccess: () => {
       setSnack('Account verified.');
@@ -127,7 +127,7 @@ export default function AdminUsers() {
   const deleteMutation = useMutation({
     mutationFn: async (profile: Profile) => {
       const { error: rpcErr } = await supabase.rpc('admin_delete_user', { p_target_user_id: profile.id });
-      if (rpcErr) throw rpcErr;
+      if (rpcErr) throw new Error(rpcErr.message);
     },
     onSuccess: () => {
       setSnack('User deleted.');
@@ -141,7 +141,7 @@ export default function AdminUsers() {
   const rejectMutation = useMutation({
     mutationFn: async (profile: Profile) => {
       const { error: rpcErr } = await supabase.rpc('admin_delete_user', { p_target_user_id: profile.id });
-      if (rpcErr) throw rpcErr;
+      if (rpcErr) throw new Error(rpcErr.message);
     },
     onSuccess: () => {
       setSnack('Account rejected and removed.');
