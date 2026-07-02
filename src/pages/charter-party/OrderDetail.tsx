@@ -22,7 +22,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 
 import { supabase } from '@/lib/supabase';
-import { useOrderDetail, type LineItemDetail } from '@/hooks/useOrderDetail';
+import { useOrderDetail } from '@/hooks/useOrderDetail';
 import OrderStatusBadge from '@/components/shared/OrderStatusBadge';
 import ServiceCategoryIcon from '@/components/shared/ServiceCategoryIcon';
 import { palette, fonts, radius } from '@/constants/theme';
