@@ -4,6 +4,7 @@ import { Box, Card, Typography, CircularProgress } from '@mui/material';
 import WarningAmber from '@mui/icons-material/WarningAmber';
 import DoneAllOutlined from '@mui/icons-material/DoneAllOutlined';
 import ChevronRight from '@mui/icons-material/ChevronRight';
+import ChatBubbleOutlined from '@mui/icons-material/ChatBubbleOutlined';
 import { useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 
@@ -149,6 +150,7 @@ export default function SupplierDashboard() {
                     <Box sx={{ flex: 1, minWidth: 0 }}>
                       <Typography noWrap sx={{ color: palette.fogWhite, fontWeight: 600, fontSize: 15 }}>
                         {li.service_categories?.name ?? 'Service'}
+                        {li.order?.order_number ? ` (${li.order.order_number})` : ''}
                       </Typography>
                       <Typography noWrap sx={{ color: palette.hullGray, fontSize: 13 }}>
                         {li.order?.vessel_name ?? 'Vessel'} · {li.order?.port?.name ?? 'Port'}
@@ -159,7 +161,10 @@ export default function SupplierDashboard() {
                         </Typography>
                       )}
                     </Box>
-                    <ChevronRight sx={{ color: palette.hullGray }} />
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <ChatBubbleOutlined sx={{ color: palette.steelBlue, fontSize: 20 }} />
+                      <ChevronRight sx={{ color: palette.hullGray }} />
+                    </Box>
                   </Card>
                 ))}
               </Box>

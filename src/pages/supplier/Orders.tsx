@@ -7,6 +7,7 @@ import DirectionsBoatOutlined from '@mui/icons-material/DirectionsBoatOutlined';
 import LocationOnOutlined from '@mui/icons-material/LocationOnOutlined';
 import AccessTime from '@mui/icons-material/AccessTime';
 import Inventory2Outlined from '@mui/icons-material/Inventory2Outlined';
+import ChatBubbleOutlined from '@mui/icons-material/ChatBubbleOutlined';
 import dayjs from 'dayjs';
 
 import { useAuthStore } from '@/stores/authStore';
@@ -124,6 +125,9 @@ export default function SupplierOrders() {
             {li.quantity != null && (
               <MetaRow icon={<Inventory2Outlined sx={{ fontSize: 14, color: palette.hullGray }} />} text={`${li.quantity} ${li.unit ?? ''}`} />
             )}
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+              <ChatBubbleOutlined sx={{ color: palette.steelBlue, fontSize: 20 }} />
+            </Box>
           </Card>
         ))
       )}

@@ -45,6 +45,12 @@ import AgentOrderDetail from '@/pages/ship-agent/OrderDetail';
 import AgentDocuments from '@/pages/ship-agent/Documents';
 import AgentProfile from '@/pages/ship-agent/Profile';
 
+// Supplier
+import SupplierDashboard from '@/pages/supplier/Dashboard';
+import SupplierOrders from '@/pages/supplier/Orders';
+import SupplierOrderDetail from '@/pages/supplier/OrderDetail';
+import SupplierProfile from '@/pages/supplier/Profile';
+
 // Admin
 import AdminUsers from '@/pages/admin/Users';
 import AdminMonitoring from '@/pages/admin/Monitoring';
@@ -236,6 +242,15 @@ export default function App() {
         <Route path="orders/:id" element={<AgentOrderDetail />} />
         <Route path="documents" element={<AgentDocuments />} />
         <Route path="profile" element={<AgentProfile />} />
+      </Route>
+
+      {/* Supplier */}
+      <Route path="/supplier" element={<RequireRole role="supplier"><AppShell role="supplier" /></RequireRole>}>
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<SupplierDashboard />} />
+        <Route path="orders" element={<SupplierOrders />} />
+        <Route path="orders/:id" element={<SupplierOrderDetail />} />
+        <Route path="profile" element={<SupplierProfile />} />
       </Route>
 
       {/* Admin */}
