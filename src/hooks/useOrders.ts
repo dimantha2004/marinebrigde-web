@@ -19,7 +19,7 @@ export function useOrders(role: UserRole | null | undefined, userId: string | nu
         if (role === 'charter_party') {
           q = q.eq('charter_party_id', userId);
         } else if (role === 'ship_agent') {
-          q = q.eq('ship_agent_id', userId);
+          q = q.eq('ship_agent_id', userId).neq('overall_status', 'draft').neq('overall_status', 'pending_charter_approval');
         } else if (role === 'captain') {
           q = q.eq('captain_id', userId);
         }

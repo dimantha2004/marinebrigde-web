@@ -14,7 +14,7 @@ import CheckCircle from '@mui/icons-material/CheckCircle';
 import ErrorOutlined from '@mui/icons-material/ErrorOutlined';
 
 import { useUpdateLineStatus } from '@/hooks/useSupplierOrders';
-import { SUPPLIER_NEXT_ACTIONS, LINE_STATUS_META, type LineStatus } from '@/constants/orderStatuses';
+import { AGENT_NEXT_ACTIONS, LINE_STATUS_META, type LineStatus } from '@/constants/orderStatuses';
 import type { OrderLineItem } from '@/types/database';
 import { palette, fonts } from '@/constants/theme';
 
@@ -42,7 +42,7 @@ export default function StatusUpdateSheet({
 
   const actions = useMemo(() => {
     if (!lineItem) return [];
-    return SUPPLIER_NEXT_ACTIONS[lineItem.line_status as LineStatus] ?? [];
+    return AGENT_NEXT_ACTIONS[lineItem.line_status as LineStatus] ?? [];
   }, [lineItem]);
 
   const [selected, setSelected] = useState<LineStatus | null>(null);

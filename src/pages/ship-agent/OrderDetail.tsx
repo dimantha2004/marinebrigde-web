@@ -36,6 +36,8 @@ import TimelineTracker from '@/components/shared/TimelineTracker';
 import DocumentCard from '@/components/shared/DocumentCard';
 import MessageThread from '@/components/shared/MessageThread';
 import ServiceCategoryIcon from '@/components/shared/ServiceCategoryIcon';
+import QuotationSubmitSheet from '@/components/supplier/QuotationSubmitSheet';
+import StatusUpdateSheet from '@/components/supplier/StatusUpdateSheet';
 import { palette, fonts, radius } from '@/constants/theme';
 
 const ACCEPT = '.pdf,.jpg,.jpeg,.png,.docx';
@@ -50,6 +52,8 @@ export default function AgentOrderDetail() {
   const { order, lineItems, documents, isLoading, error, refetch } = useOrderDetail(orderId);
 
   const [chatLineItem, setChatLineItem] = useState<LineItemDetail | null>(null);
+  const [quotationLine, setQuotationLine] = useState<any | null>(null);
+  const [statusUpdateLine, setStatusUpdateLine] = useState<any | null>(null);
   const [uploading, setUploading] = useState(false);
   const [markingInExecution, setMarkingInExecution] = useState(false);
   const [snack, setSnack] = useState<string | null>(null);
@@ -233,18 +237,66 @@ export default function AgentOrderDetail() {
                 {li.specifications && <DetailLine label="Specifications" value={li.specifications} />}
                 {li.total_price != null && <DetailLine label="Line Total" value={`$${li.total_price.toFixed(2)}`} />}
                 {li.supplier_decline_reason && <DetailLine label="Decline Reason" value={li.supplier_decline_reason} />}
-                <Button
-                  variant="outlined"
-                  startIcon={<ChatBubbleOutlined />}
-                  onClick={() => setChatLineItem(li)}
-                  sx={{ mt: 1.5, color: palette.steelBlue, borderColor: palette.steelBlue }}
-                >
-                  Open Chat
-                </Button>
+                
+                <Box sx={{ display: 'flex', gap: 1, mt: 1.5, flexWrap: 'wrap' }}>
+                  <Button
+                    variant="outlined"
+                    startIcon={<ChatBubbleOutlined />}
+                    onClick={() => setChatLineItem(li as any)}
+                    sx={{ color: palette.steelBlue, borderColor: palette.steelBlue }}
+                  >
+                    Open Chat
+                  </Button>
+                  
+                  {li.line_status === 'pending_supplier' && (
+                    <Button
+                      variant="contained"
+                      onClick={() => setQuotationLine({ ...li, order: { id: orderId } } as any)}
+                      sx={{ bgcolor: palette.steelBlue, '&:hover': { bgcolor: palette.oceanMid } }}
+                    >
+                      Submit Quotations
+                    </Button>
+                  )}
+                  {li.line_status !== 'pending_supplier' &&
+                   li.line_status !== 'pending_charter_selection' &&
+                   li.line_status !== 'cancelled' &&
+                   li.line_status !== 'delivered' &&
+                   li.line_status !== 'supplier_declined' && (
+                    <Button
+                      variant="outlined"
+                      onClick={() => setStatusUpdateLine(li as any)}
+                      sx={{ color: palette.fogWhite, borderColor: palette.oceanMid }}
+                    >
+                      Update Status
+                    </Button>
+                  )}
+                </Box>
               </AccordionDetails>
             </Accordion>
           );
         })
+      )}
+
+      {quotationLine && (
+        <QuotationSubmitSheet
+          open={!!quotationLine}
+          onClose={() => setQuotationLine(null)}
+          lineItem={quotationLine}
+          onConfirm={() => {
+            refetch();
+          }}
+        />
+      )}
+
+      {statusUpdateLine && (
+        <StatusUpdateSheet
+          open={!!statusUpdateLine}
+          onClose={() => setStatusUpdateLine(null)}
+          lineItem={statusUpdateLine}
+          onConfirm={() => {
+            refetch();
+          }}
+        />
       )}
 
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 2, mb: 1 }}>

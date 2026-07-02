@@ -52,8 +52,8 @@ export const OVERALL_STATUS_META: Record<OverallStatus, StatusMeta> = {
 };
 
 export const LINE_STATUS_META: Record<LineStatus, StatusMeta> = {
-  pending_supplier: { label: 'Awaiting Supplier', color: palette.signalAmber },
-  supplier_quoted: { label: 'Supplier Quoted', color: palette.steelBlue },
+  pending_supplier: { label: 'Awaiting Agent Quote', color: palette.signalAmber },
+  supplier_quoted: { label: 'Agent Quoted', color: palette.steelBlue },
   pending_charter_selection: { label: 'Pending Quote Selection', color: palette.signalAmber },
   supplier_accepted: { label: 'Accepted', color: palette.steelBlue },
   supplier_declined: { label: 'Declined', color: palette.alertRed },
@@ -77,10 +77,10 @@ export const ORDER_STEPPER: { key: OverallStatus; label: string }[] = [
 ];
 
 /**
- * Supplier action transitions — the next status a supplier can move a line to,
+ * Agent action transitions — the next status an agent can move a line to,
  * keyed by current line_status. Drives the StatusUpdateSheet buttons.
  */
-export const SUPPLIER_NEXT_ACTIONS: Partial<
+export const AGENT_NEXT_ACTIONS: Partial<
   Record<LineStatus, { next: LineStatus; label: string; requiresDocument?: boolean }[]>
 > = {
   pending_supplier: [

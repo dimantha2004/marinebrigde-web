@@ -36,7 +36,7 @@ import MessageThread from '@/components/shared/MessageThread';
 import ServiceCategoryIcon from '@/components/shared/ServiceCategoryIcon';
 import StatusUpdateSheet from '@/components/supplier/StatusUpdateSheet';
 import QuotationSubmitSheet from '@/components/supplier/QuotationSubmitSheet';
-import { SUPPLIER_NEXT_ACTIONS, type LineStatus } from '@/constants/orderStatuses';
+import { AGENT_NEXT_ACTIONS, type LineStatus } from '@/constants/orderStatuses';
 import type { OrderDocument } from '@/types/database';
 import { palette, fonts, radius } from '@/constants/theme';
 
@@ -212,7 +212,7 @@ export default function SupplierOrderDetail() {
 
       {myLines.map((li) => {
         const lineDocs = docsByLine.get(li.id) ?? [];
-        const nextActions = SUPPLIER_NEXT_ACTIONS[li.line_status as LineStatus] ?? [];
+        const nextActions = AGENT_NEXT_ACTIONS[li.line_status as LineStatus] ?? [];
         return (
           <Card key={li.id} sx={{ p: 2, mb: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
