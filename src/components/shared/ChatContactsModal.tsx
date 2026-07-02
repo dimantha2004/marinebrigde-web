@@ -40,7 +40,6 @@ const ROLE_LABEL: Record<string, string> = {
   captain: 'Captain',
   charter_party: 'Charter Party',
   ship_agent: 'Ship Agent',
-  port_authority: 'Port Authority',
   supplier: 'Supplier',
   admin: 'Admin',
 };

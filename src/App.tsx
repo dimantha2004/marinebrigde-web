@@ -36,10 +36,7 @@ import CharterOrderDetail from '@/pages/charter-party/OrderDetail';
 import CharterCheckout from '@/pages/charter-party/Checkout';
 import CharterProfile from '@/pages/charter-party/Profile';
 
-// Port authority
-import PortDashboard from '@/pages/port-authority/Dashboard';
-import PortApprovals from '@/pages/port-authority/Approvals';
-import PortProfile from '@/pages/port-authority/Profile';
+
 
 // Ship agent
 import AgentHub from '@/pages/ship-agent/Hub';
@@ -229,13 +226,7 @@ export default function App() {
         <Route path="profile" element={<CharterProfile />} />
       </Route>
 
-      {/* Port authority */}
-      <Route path="/port-authority" element={<RequireRole role="port_authority"><AppShell role="port_authority" /></RequireRole>}>
-        <Route index element={<Navigate to="dashboard" replace />} />
-        <Route path="dashboard" element={<PortDashboard />} />
-        <Route path="approvals" element={<PortApprovals />} />
-        <Route path="profile" element={<PortProfile />} />
-      </Route>
+
 
       {/* Ship agent */}
       <Route path="/ship-agent" element={<RequireRole role="ship_agent"><AppShell role="ship_agent" /></RequireRole>}>

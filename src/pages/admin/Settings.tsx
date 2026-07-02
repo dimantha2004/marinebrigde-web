@@ -72,7 +72,7 @@ export default function AdminSettings() {
 
       <Typography sx={{ fontWeight: 600, color: palette.fogWhite, fontSize: 16 }}>Service Catalog</Typography>
       <Typography sx={{ color: palette.hullGray, fontSize: 12, mb: 1 }}>
-        Read-only. PA = requires Port Authority approval.
+        Read-only.
       </Typography>
 
       {isLoading ? (
@@ -111,11 +111,7 @@ export default function AdminSettings() {
                 <Typography sx={{ flex: 1, color: palette.fogWhite, fontWeight: 500, fontSize: 15 }}>
                   {cat.name}
                 </Typography>
-                {cat.requires_port_authority_approval ? (
-                  <Chip label="PA" size="small" sx={{ bgcolor: `${palette.signalAmber}33`, color: palette.signalAmber, fontWeight: 600 }} />
-                ) : (
-                  <Typography sx={{ color: palette.hullGray, fontSize: 11 }}>No approval</Typography>
-                )}
+
               </Box>
             </Box>
           ))}

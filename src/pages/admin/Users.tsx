@@ -43,7 +43,6 @@ const ROLE_LABEL: Record<string, string> = {
   captain: 'Captain',
   charter_party: 'Charter Party',
   ship_agent: 'Ship Agent',
-  port_authority: 'Port Authority',
   supplier: 'Supplier',
   admin: 'Admin',
 };
@@ -52,7 +51,6 @@ const ROLE_COLOR: Record<UserRole, string> = {
   captain: palette.steelBlue,
   charter_party: palette.signalAmber,
   ship_agent: palette.engineGreen,
-  port_authority: '#8B5CF6',
   supplier: '#06B6D4',
   admin: palette.alertRed,
 };
@@ -78,9 +76,7 @@ function detailFields(p: Profile): { label: string; value: string | null }[] {
     case 'ship_agent':
       extra.push({ label: 'Company Reg No', value: p.company_reg_no }, { label: 'IMO Agent Code', value: p.imo_agent_code }, { label: 'TIN No', value: p.tin_no });
       break;
-    case 'port_authority':
-      extra.push({ label: 'UN/LOCODE', value: p.unlocode }, { label: 'Port ID', value: p.port_id_text }, { label: 'ISPS Code', value: p.isps_code });
-      break;
+
     case 'supplier':
       extra.push({ label: 'Business No', value: p.business_no }, { label: 'TIN No', value: p.tin_no }, { label: 'DUNS No', value: p.duns_no });
       break;

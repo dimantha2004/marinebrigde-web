@@ -80,14 +80,6 @@ const NAV: Record<UserRole, { base: string; items: NavItem[] }> = {
       { label: 'Profile', path: 'profile', icon: Person },
     ],
   },
-  port_authority: {
-    base: '/port-authority',
-    items: [
-      { label: 'Dashboard', path: 'dashboard', icon: Speed },
-      { label: 'Approvals', path: 'approvals', icon: VerifiedUser },
-      { label: 'Profile', path: 'profile', icon: Person },
-    ],
-  },
   ship_agent: {
     base: '/ship-agent',
     items: [
