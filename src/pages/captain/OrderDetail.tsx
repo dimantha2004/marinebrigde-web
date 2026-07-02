@@ -49,6 +49,7 @@ export default function CaptainOrderDetail() {
 
   const [chatLineItem, setChatLineItem] = useState<LineItemDetail | null>(null);
   const [cancelling, setCancelling] = useState(false);
+  const [markingCompleted, setMarkingCompleted] = useState(false);
   const [snack, setSnack] = useState<string | null>(null);
 
   useEffect(() => {
@@ -88,6 +89,22 @@ export default function CaptainOrderDetail() {
     }
     await refetch();
     setSnack('Order cancelled.');
+  };
+
+  const handleMarkCompleted = async () => {
+    if (!orderId) return;
+    setMarkingCompleted(true);
+    const { error: updateError } = await supabase
+      .from('orders')
+      .update({ overall_status: 'completed' })
+      .eq('id', orderId);
+    setMarkingCompleted(false);
+    if (updateError) {
+      setSnack(updateError.message);
+      return;
+    }
+    await refetch();
+    setSnack('Order marked as Completed.');
   };
 
   const header = (
@@ -228,6 +245,16 @@ export default function CaptainOrderDetail() {
       )}
 
       <Box sx={{ mt: 3, display: 'flex', flexDirection: 'column', gap: 1, maxWidth: 360 }}>
+        {order.overall_status === 'in_execution' && (
+          <Button
+            variant="contained"
+            disabled={markingCompleted}
+            onClick={handleMarkCompleted}
+            sx={{ height: 48, bgcolor: palette.steelBlue, '&:hover': { bgcolor: '#2C5E8A' } }}
+          >
+            {markingCompleted ? <CircularProgress size={20} sx={{ color: palette.fogWhite }} /> : 'Mark Completed'}
+          </Button>
+        )}
         {canCancel && (
           <Button
             variant="outlined"

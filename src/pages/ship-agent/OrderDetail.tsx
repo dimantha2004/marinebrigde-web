@@ -51,6 +51,7 @@ export default function AgentOrderDetail() {
 
   const [chatLineItem, setChatLineItem] = useState<LineItemDetail | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [markingInExecution, setMarkingInExecution] = useState(false);
   const [snack, setSnack] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -95,6 +96,22 @@ export default function AgentOrderDetail() {
     }
     await refetch();
     setSnack('Document uploaded.');
+  };
+
+  const handleMarkInExecution = async () => {
+    if (!orderId) return;
+    setMarkingInExecution(true);
+    const { error: updateError } = await supabase
+      .from('orders')
+      .update({ overall_status: 'in_execution' })
+      .eq('id', orderId);
+    setMarkingInExecution(false);
+    if (updateError) {
+      setSnack(updateError.message);
+      return;
+    }
+    await refetch();
+    setSnack('Order marked as In Execution.');
   };
 
   const header = (
@@ -249,6 +266,19 @@ export default function AgentOrderDetail() {
           <DocumentCard key={doc.id} document={doc} onOpen={(d) => d.file_url && openDocument(d.file_url)} />
         ))
       )}
+
+      <Box sx={{ mt: 3, display: 'flex', flexDirection: 'column', gap: 1, maxWidth: 360 }}>
+        {order.overall_status === 'active' && (
+          <Button
+            variant="contained"
+            disabled={markingInExecution}
+            onClick={handleMarkInExecution}
+            sx={{ height: 48, bgcolor: palette.steelBlue, '&:hover': { bgcolor: '#2C5E8A' } }}
+          >
+            {markingInExecution ? <CircularProgress size={20} sx={{ color: palette.fogWhite }} /> : 'Mark In Execution'}
+          </Button>
+        )}
+      </Box>
 
       <Dialog
         open={chatLineItem !== null}

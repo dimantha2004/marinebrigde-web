@@ -36,11 +36,6 @@ function formatAmount(value: number | null | undefined): string {
   return `$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-function supplierLabel(line: LineItemDetail): string | null {
-  const profile = line.supplier_mapping?.supplier_profile;
-  if (!profile) return null;
-  return profile.company_name || profile.full_name || null;
-}
 
 export default function CharterOrderDetail() {
   const navigate = useNavigate();
@@ -193,11 +188,7 @@ export default function CharterOrderDetail() {
                   </Typography>
                 )}
               </Box>
-              {supplierLabel(line as LineItemDetail) && (
-                <Typography sx={{ color: palette.hullGray, fontSize: 13, mt: 0.5 }}>
-                  Supplier: {supplierLabel(line as LineItemDetail)}
-                </Typography>
-              )}
+
               {line.specifications && (
                 <Typography sx={{ color: palette.fogWhite, fontSize: 13, mt: 1 }}>{line.specifications}</Typography>
               )}
