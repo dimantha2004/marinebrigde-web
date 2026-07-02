@@ -129,7 +129,7 @@ export function useSubmitQuotations() {
         .eq('id', lineItemId);
       if (updateError) throw updateError;
     },
-    onSuccess: (_, { lineItemId }) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['supplier-orders'] });
       // We don't have order_id here easily without fetching, but invalidating 'supplier-orders' refreshes the list
     },

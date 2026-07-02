@@ -201,7 +201,7 @@ export default function QuotationSubmitSheet({
                 fullWidth
                 size="small"
                 sx={{ mb: 1.5 }}
-                InputProps={{ inputProps: { min: 0, step: 0.01 } }}
+                slotProps={{ htmlInput: { min: 0, step: 0.01 } }}
               />
               <TextField
                 label="Description (e.g. OEM, Aftermarket)"

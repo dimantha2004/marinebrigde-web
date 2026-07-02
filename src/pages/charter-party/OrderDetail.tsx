@@ -15,7 +15,7 @@ import ArrowBack from '@mui/icons-material/ArrowBack';
 import CreditCard from '@mui/icons-material/CreditCard';
 import WarningAmber from '@mui/icons-material/WarningAmber';
 import ErrorOutlined from '@mui/icons-material/ErrorOutlined';
-import InfoOutlined from '@mui/icons-material/InfoOutlined';
+
 import Check from '@mui/icons-material/Check';
 import Close from '@mui/icons-material/Close';
 import { useQueryClient } from '@tanstack/react-query';
@@ -49,7 +49,7 @@ export default function CharterOrderDetail() {
 
   const [comments, setComments] = useState('');
   const [submitting, setSubmitting] = useState<Decision | null>(null);
-  const [snackbar, setSnackbar] = useState<string | null>(null);
+  const [snackbar, setSnackbar] = useState<{ message: string; severity: 'success' | 'error' } | null>(null);
 
   useEffect(() => {
     setComments('');
@@ -65,10 +65,9 @@ export default function CharterOrderDetail() {
   const decided = order != null && order.overall_status !== 'pending_charter_approval';
   const hasPendingQuotationActions = lineItems?.some(
     (li) => 
-      CLAUSE_SERVICES.includes(li.service_categories?.name ?? '') &&
-      (li.line_status === 'pending_supplier' || li.line_status === 'pending_charter_selection')
+      li.line_status === 'pending_supplier' || li.line_status === 'pending_charter_selection'
   );
-  const canPay = order?.overall_status === 'pending_payment' && !hasPendingQuotationActions;
+  const canPay = (order?.overall_status === 'pending_payment' || order?.overall_status === 'pending_charter_approval') && !hasPendingQuotationActions;
 
   const submitDecision = async (decision: Decision) => {
     if (!orderId || submitting) return;
@@ -86,7 +85,7 @@ export default function CharterOrderDetail() {
       queryClient.invalidateQueries({ queryKey: ['order', orderId] });
       navigate(-1);
     } catch (e) {
-      setSnackbar(e instanceof Error ? e.message : 'Failed to submit decision.');
+      setSnackbar({ message: e instanceof Error ? e.message : 'Failed to submit decision.', severity: 'error' });
       setSubmitting(null);
     }
   };
@@ -261,8 +260,8 @@ export default function CharterOrderDetail() {
                                 currentTotalAmount: order.total_amount,
                               },
                               {
-                                onSuccess: () => setSnackbar('Quotation selected successfully.'),
-                                onError: (err) => setSnackbar(err.message),
+                                onSuccess: () => setSnackbar({ message: 'Quotation selected successfully.', severity: 'success' }),
+                                onError: (err) => setSnackbar({ message: err.message, severity: 'error' }),
                               }
                             );
                           }}
@@ -281,34 +280,28 @@ export default function CharterOrderDetail() {
       )}
 
       {order?.total_amount != null && (
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 2, mb: 2, borderTop: `1px solid ${palette.navyDeep}`, borderBottom: `1px solid ${palette.navyDeep}` }}>
-          <Typography sx={{ fontWeight: 600, color: palette.fogWhite, fontSize: 16 }}>Total Amount</Typography>
-          <Typography sx={{ fontFamily: fonts.display, color: palette.signalAmber, fontSize: 24 }}>
-            {formatAmount(order.total_amount)}
-          </Typography>
-        </Box>
-      )}
-
-      {decided ? (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, bgcolor: palette.oceanMid, borderRadius: `${radius.md}px`, p: 2 }}>
-            <InfoOutlined sx={{ color: palette.hullGray, fontSize: 18 }} />
-            <Typography sx={{ color: palette.hullGray, fontSize: 13 }}>
-              This order is no longer pending charter approval. (Status: {order?.overall_status}, canPay: {canPay ? 'true' : 'false'}, pendingQuotes: {hasPendingQuotationActions ? 'true' : 'false'})
+        <Box sx={{ mb: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 2, borderTop: `1px solid ${palette.navyDeep}`, borderBottom: `1px solid ${palette.navyDeep}` }}>
+            <Typography sx={{ fontWeight: 600, color: palette.fogWhite, fontSize: 16 }}>Total Amount</Typography>
+            <Typography sx={{ fontFamily: fonts.display, color: palette.signalAmber, fontSize: 24 }}>
+              {formatAmount(order.total_amount)}
             </Typography>
           </Box>
           {canPay && (
             <Button
               variant="contained"
+              fullWidth
               startIcon={<CreditCard />}
-              sx={{ height: 48, maxWidth: 360 }}
+              sx={{ height: 48, mt: 2, bgcolor: palette.steelBlue, '&:hover': { bgcolor: palette.oceanMid } }}
               onClick={() => navigate(`/charter-party/checkout?id=${order.id}`)}
             >
               Pay Now
             </Button>
           )}
         </Box>
-      ) : (
+      )}
+
+      {!decided && (
         <>
           <Typography sx={{ fontWeight: 600, color: palette.fogWhite, fontSize: 16, mb: 1 }}>Decision</Typography>
           <TextField
@@ -346,8 +339,8 @@ export default function CharterOrderDetail() {
       )}
 
       <Snackbar open={snackbar != null} autoHideDuration={4000} onClose={() => setSnackbar(null)}>
-        <Alert onClose={() => setSnackbar(null)} variant="filled" severity="error">
-          {snackbar}
+        <Alert onClose={() => setSnackbar(null)} variant="filled" severity={snackbar?.severity || 'error'}>
+          {snackbar?.message}
         </Alert>
       </Snackbar>
     </Box>
