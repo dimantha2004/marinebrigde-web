@@ -8,7 +8,7 @@ import type { Profile, UserRole } from '@/types/database';
  */
 export const ROLE_HOME: Record<UserRole, string> = {
   captain: '/captain/dashboard',
-  charter_party: '/charter-party/approvals',
+  charter_party: '/charter-party/dashboard',
   ship_agent: '/ship-agent/hub',
   port_authority: '/port-authority/dashboard',
   supplier: '/supplier/dashboard',

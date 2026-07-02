@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Button, Card, Typography, CircularProgress } from '@mui/material';
 import AddCircle from '@mui/icons-material/AddCircle';
@@ -26,6 +26,8 @@ export default function CaptainDashboard() {
 
   const { data: orders, isLoading, error } = useOrders('captain', userId);
 
+  const [activeTab, setActiveTab] = useState<'active' | 'pending' | 'completed'>('active');
+
   const counts = useMemo(() => {
     let active = 0;
     let pending = 0;
@@ -38,8 +40,26 @@ export default function CaptainDashboard() {
     return { active, pending, completed };
   }, [orders]);
 
-  const recent = orders.slice(0, 5);
+  const filteredOrders = useMemo(() => {
+    if (activeTab === 'active') {
+      return orders.filter((o: Order) => ACTIVE_STATUSES.includes(o.overall_status));
+    }
+    if (activeTab === 'pending') {
+      return orders.filter((o: Order) => PENDING_STATUSES.includes(o.overall_status));
+    }
+    if (activeTab === 'completed') {
+      return orders.filter((o: Order) => o.overall_status === 'completed');
+    }
+    return [];
+  }, [orders, activeTab]);
+
   const greeting = profile?.full_name ? profile.full_name.split(' ')[0] : 'Captain';
+
+  const listTitle = useMemo(() => {
+    if (activeTab === 'active') return `Active Orders (${filteredOrders.length})`;
+    if (activeTab === 'pending') return `Pending Orders (${filteredOrders.length})`;
+    return `Completed Orders (${filteredOrders.length})`;
+  }, [activeTab, filteredOrders.length]);
 
   return (
     <Box>
@@ -58,13 +78,34 @@ export default function CaptainDashboard() {
       </Button>
 
       <Box sx={{ display: 'flex', gap: 1.5, mb: 3 }}>
-        <SummaryCard label="Active" value={counts.active} color={palette.steelBlue} icon={DirectionsBoat} />
-        <SummaryCard label="Pending" value={counts.pending} color={palette.signalAmber} icon={AccessTime} />
-        <SummaryCard label="Completed" value={counts.completed} color={palette.engineGreen} icon={DoneAll} />
+        <SummaryCard
+          label="Active"
+          value={counts.active}
+          color={palette.steelBlue}
+          icon={DirectionsBoat}
+          active={activeTab === 'active'}
+          onClick={() => setActiveTab('active')}
+        />
+        <SummaryCard
+          label="Pending"
+          value={counts.pending}
+          color={palette.signalAmber}
+          icon={AccessTime}
+          active={activeTab === 'pending'}
+          onClick={() => setActiveTab('pending')}
+        />
+        <SummaryCard
+          label="Completed"
+          value={counts.completed}
+          color={palette.engineGreen}
+          icon={DoneAll}
+          active={activeTab === 'completed'}
+          onClick={() => setActiveTab('completed')}
+        />
       </Box>
 
       <Typography sx={{ fontWeight: 600, color: palette.fogWhite, fontSize: 16, mb: 1.5 }}>
-        Recent Orders
+        {listTitle}
       </Typography>
 
       {isLoading ? (
@@ -76,15 +117,15 @@ export default function CaptainDashboard() {
           <WarningAmber sx={{ color: palette.alertRed, fontSize: 28 }} />
           <Typography sx={{ color: palette.hullGray, mt: 1 }}>Couldn't load orders.</Typography>
         </Box>
-      ) : recent.length === 0 ? (
+      ) : filteredOrders.length === 0 ? (
         <Box sx={{ textAlign: 'center', py: 4 }}>
           <AssignmentOutlined sx={{ color: palette.hullGray, fontSize: 32 }} />
           <Typography sx={{ color: palette.hullGray, mt: 1 }}>
-            No orders yet. Create your first order.
+            No orders found for this category.
           </Typography>
         </Box>
       ) : (
-        recent.map((order) => (
+        filteredOrders.map((order) => (
           <RecentOrderRow key={order.id} order={order} onClick={() => navigate(`/captain/orders/${order.id}`)} />
         ))
       )}
@@ -97,14 +138,29 @@ function SummaryCard({
   value,
   color,
   icon: Icon,
+  active,
+  onClick,
 }: {
   label: string;
   value: number;
   color: string;
   icon: SvgIconComponent;
+  active: boolean;
+  onClick: () => void;
 }) {
   return (
-    <Card sx={{ flex: 1, p: 2, textAlign: 'center' }}>
+    <Card
+      onClick={onClick}
+      sx={{
+        flex: 1,
+        p: 2,
+        textAlign: 'center',
+        cursor: 'pointer',
+        border: `1px solid ${active ? color : 'transparent'}`,
+        transition: 'all 0.2s ease-in-out',
+        '&:hover': { bgcolor: palette.surfaceVariant },
+      }}
+    >
       <Icon sx={{ color, fontSize: 22 }} />
       <Typography sx={{ fontFamily: fonts.display, fontSize: 24, color, mt: 0.5 }}>{value}</Typography>
       <Typography sx={{ color: palette.hullGray, fontSize: 12 }}>{label}</Typography>

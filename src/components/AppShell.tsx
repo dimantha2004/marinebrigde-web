@@ -72,8 +72,10 @@ const NAV: Record<UserRole, { base: string; items: NavItem[] }> = {
   charter_party: {
     base: '/charter-party',
     items: [
+      { label: 'Dashboard', path: 'dashboard', icon: GridView },
       { label: 'Approvals', path: 'approvals', icon: CheckCircleOutlined },
       { label: 'Payments', path: 'payments', icon: Payments },
+      { label: 'Active', path: 'active', icon: DirectionsBoat },
       { label: 'History', path: 'history', icon: History },
       { label: 'Profile', path: 'profile', icon: Person },
     ],

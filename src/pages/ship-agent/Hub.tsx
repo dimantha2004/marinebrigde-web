@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Card, Typography, CircularProgress } from '@mui/material';
 import type { SvgIconComponent } from '@mui/icons-material';
@@ -18,7 +18,6 @@ import { palette, fonts } from '@/constants/theme';
 
 const ACTIVE_STATUSES = ['active', 'in_execution', 'pending_port_approval'];
 const PENDING_STATUSES = ['pending_charter_approval', 'pending_payment', 'draft'];
-const TERMINAL_STATUSES = ['completed', 'cancelled', 'charter_rejected'];
 
 export default function AgentHub() {
   const navigate = useNavigate();
@@ -26,6 +25,8 @@ export default function AgentHub() {
   const userId = useAuthStore((s) => s.session?.user?.id ?? null);
 
   const { data: orders, isLoading, error } = useOrders('ship_agent', userId);
+
+  const [activeTab, setActiveTab] = useState<'active' | 'pending' | 'completed'>('active');
 
   const counts = useMemo(() => {
     let active = 0;
@@ -39,12 +40,26 @@ export default function AgentHub() {
     return { active, pending, completed };
   }, [orders]);
 
-  const activeOrders = useMemo(
-    () => orders.filter((o: Order) => !TERMINAL_STATUSES.includes(o.overall_status)),
-    [orders]
-  );
+  const filteredOrders = useMemo(() => {
+    if (activeTab === 'active') {
+      return orders.filter((o: Order) => ACTIVE_STATUSES.includes(o.overall_status));
+    }
+    if (activeTab === 'pending') {
+      return orders.filter((o: Order) => PENDING_STATUSES.includes(o.overall_status));
+    }
+    if (activeTab === 'completed') {
+      return orders.filter((o: Order) => o.overall_status === 'completed');
+    }
+    return [];
+  }, [orders, activeTab]);
 
   const greeting = profile?.full_name ? profile.full_name.split(' ')[0] : 'Agent';
+
+  const listTitle = useMemo(() => {
+    if (activeTab === 'active') return `Active Coordination (${filteredOrders.length})`;
+    if (activeTab === 'pending') return `Pending Coordination (${filteredOrders.length})`;
+    return `Completed Orders (${filteredOrders.length})`;
+  }, [activeTab, filteredOrders.length]);
 
   return (
     <Box>
@@ -54,13 +69,34 @@ export default function AgentHub() {
       </Typography>
 
       <Box sx={{ display: 'flex', gap: 1.5, mb: 3 }}>
-        <SummaryCard label="Active" value={counts.active} color={palette.steelBlue} icon={DirectionsBoat} />
-        <SummaryCard label="Pending" value={counts.pending} color={palette.signalAmber} icon={AccessTime} />
-        <SummaryCard label="Completed" value={counts.completed} color={palette.engineGreen} icon={DoneAll} />
+        <SummaryCard
+          label="Active"
+          value={counts.active}
+          color={palette.steelBlue}
+          icon={DirectionsBoat}
+          active={activeTab === 'active'}
+          onClick={() => setActiveTab('active')}
+        />
+        <SummaryCard
+          label="Pending"
+          value={counts.pending}
+          color={palette.signalAmber}
+          icon={AccessTime}
+          active={activeTab === 'pending'}
+          onClick={() => setActiveTab('pending')}
+        />
+        <SummaryCard
+          label="Completed"
+          value={counts.completed}
+          color={palette.engineGreen}
+          icon={DoneAll}
+          active={activeTab === 'completed'}
+          onClick={() => setActiveTab('completed')}
+        />
       </Box>
 
       <Typography sx={{ fontWeight: 600, color: palette.fogWhite, fontSize: 16, mb: 1.5 }}>
-        Active Coordination ({activeOrders.length})
+        {listTitle}
       </Typography>
 
       {isLoading ? (
@@ -72,13 +108,13 @@ export default function AgentHub() {
           <WarningAmber sx={{ color: palette.alertRed, fontSize: 28 }} />
           <Typography sx={{ color: palette.hullGray, mt: 1 }}>Couldn't load orders.</Typography>
         </Box>
-      ) : activeOrders.length === 0 ? (
+      ) : filteredOrders.length === 0 ? (
         <Box sx={{ textAlign: 'center', py: 4 }}>
           <DirectionsBoatOutlined sx={{ color: palette.hullGray, fontSize: 32 }} />
-          <Typography sx={{ color: palette.hullGray, mt: 1 }}>No active orders to coordinate.</Typography>
+          <Typography sx={{ color: palette.hullGray, mt: 1 }}>No orders found for this category.</Typography>
         </Box>
       ) : (
-        activeOrders.map((order) => (
+        filteredOrders.map((order) => (
           <Card
             key={order.id}
             onClick={() => navigate(`/ship-agent/orders/${order.id}`)}
@@ -111,14 +147,29 @@ function SummaryCard({
   value,
   color,
   icon: Icon,
+  active,
+  onClick,
 }: {
   label: string;
   value: number;
   color: string;
   icon: SvgIconComponent;
+  active: boolean;
+  onClick: () => void;
 }) {
   return (
-    <Card sx={{ flex: 1, p: 2, textAlign: 'center' }}>
+    <Card
+      onClick={onClick}
+      sx={{
+        flex: 1,
+        p: 2,
+        textAlign: 'center',
+        cursor: 'pointer',
+        border: `1px solid ${active ? color : 'transparent'}`,
+        transition: 'all 0.2s ease-in-out',
+        '&:hover': { bgcolor: palette.surfaceVariant },
+      }}
+    >
       <Icon sx={{ color, fontSize: 22 }} />
       <Typography sx={{ fontFamily: fonts.display, fontSize: 24, color, mt: 0.5 }}>{value}</Typography>
       <Typography sx={{ color: palette.hullGray, fontSize: 12 }}>{label}</Typography>

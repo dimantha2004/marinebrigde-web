@@ -27,8 +27,10 @@ import NewOrderCart from '@/pages/captain/new-order/Cart';
 
 
 // Charter party
+import CharterDashboard from '@/pages/charter-party/Dashboard';
 import CharterApprovals from '@/pages/charter-party/Approvals';
 import CharterPayments from '@/pages/charter-party/Payments';
+import CharterActive from '@/pages/charter-party/Active';
 import CharterHistory from '@/pages/charter-party/History';
 import CharterOrderDetail from '@/pages/charter-party/OrderDetail';
 import CharterCheckout from '@/pages/charter-party/Checkout';
@@ -216,9 +218,11 @@ export default function App() {
 
       {/* Charter party */}
       <Route path="/charter-party" element={<RequireRole role="charter_party"><AppShell role="charter_party" /></RequireRole>}>
-        <Route index element={<Navigate to="approvals" replace />} />
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<CharterDashboard />} />
         <Route path="approvals" element={<CharterApprovals />} />
         <Route path="payments" element={<CharterPayments />} />
+        <Route path="active" element={<CharterActive />} />
         <Route path="history" element={<CharterHistory />} />
         <Route path="order/:orderId" element={<CharterOrderDetail />} />
         <Route path="checkout" element={<CharterCheckout />} />
