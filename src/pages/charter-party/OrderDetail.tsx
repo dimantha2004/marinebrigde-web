@@ -22,7 +22,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 
 import { supabase } from '@/lib/supabase';
-import { useOrderDetail } from '@/hooks/useOrderDetail';
+import { useOrderDetail, type LineItemDetail } from '@/hooks/useOrderDetail';
 import OrderStatusBadge from '@/components/shared/OrderStatusBadge';
 import ServiceCategoryIcon from '@/components/shared/ServiceCategoryIcon';
 import { palette, fonts, radius } from '@/constants/theme';
@@ -31,6 +31,16 @@ const CLAUSE_SERVICES = ['Bunkering', 'De-bunkering'];
 
 type Decision = 'approve' | 'reject';
 
+function formatAmount(value: number | null | undefined): string {
+  if (value == null) return '—';
+  return `$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+function supplierLabel(line: LineItemDetail): string | null {
+  const profile = line.supplier_mapping?.supplier_profile;
+  if (!profile) return null;
+  return profile.company_name || profile.full_name || null;
+}
 
 export default function CharterOrderDetail() {
   const navigate = useNavigate();
@@ -177,17 +187,40 @@ export default function CharterOrderDetail() {
                 <Typography sx={{ color: palette.hullGray, fontSize: 13 }}>
                   Qty: {line.quantity ?? '—'} {line.unit ?? ''}
                 </Typography>
+                {line.unit_price != null && (
+                  <Typography sx={{ color: palette.hullGray, fontSize: 13 }}>
+                    @ {formatAmount(line.unit_price)}
+                  </Typography>
+                )}
               </Box>
+              {supplierLabel(line as LineItemDetail) && (
+                <Typography sx={{ color: palette.hullGray, fontSize: 13, mt: 0.5 }}>
+                  Supplier: {supplierLabel(line as LineItemDetail)}
+                </Typography>
+              )}
               {line.specifications && (
                 <Typography sx={{ color: palette.fogWhite, fontSize: 13, mt: 1 }}>{line.specifications}</Typography>
               )}
-
+              {line.total_price != null && (
+                <Box sx={{ mt: 1, textAlign: 'right' }}>
+                  <Typography sx={{ fontFamily: 'monospace', color: palette.fogWhite, fontSize: 14 }}>
+                    {formatAmount(line.total_price)}
+                  </Typography>
+                </Box>
+              )}
             </Card>
           );
         })
       )}
 
-
+      {order?.total_amount != null && (
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 2, mb: 2, borderTop: `1px solid ${palette.navyDeep}`, borderBottom: `1px solid ${palette.navyDeep}` }}>
+          <Typography sx={{ fontWeight: 600, color: palette.fogWhite, fontSize: 16 }}>Total Amount</Typography>
+          <Typography sx={{ fontFamily: fonts.display, color: palette.signalAmber, fontSize: 24 }}>
+            {formatAmount(order.total_amount)}
+          </Typography>
+        </Box>
+      )}
 
       {decided ? (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
